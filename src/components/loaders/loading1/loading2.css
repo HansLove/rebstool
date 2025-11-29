@@ -1,0 +1,108 @@
+:root {
+  --size: 28px;
+}
+
+.lds-roller {
+  display: inline-block;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  /* padding-top: 5%; */
+}
+
+.lds-roller div {
+  animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  transform-origin: calc(var(--size) / 2) calc(var(--size) / 2);
+}
+
+.lds-roller div:after {
+  content: ' ';
+  display: block;
+  position: absolute;
+  width: calc(var(--size) * 0.0875);
+  height: calc(var(--size) * 0.0875);
+  border-radius: 50%;
+  background: blue;
+  margin: calc(-1 * var(--size) * 0.05) 0 0 calc(-1 * var(--size) * 0.05);
+}
+
+.lds-roller div:nth-child(1) {
+  animation-delay: -0.036s;
+}
+
+.lds-roller div:nth-child(1):after {
+  top: calc(var(--size) * 0.7875);
+  left: calc(var(--size) * 0.7875);
+}
+
+.lds-roller div:nth-child(2) {
+  animation-delay: -0.072s;
+}
+
+.lds-roller div:nth-child(2):after {
+  top: calc(var(--size) * 0.85);
+  left: calc(var(--size) * 0.7);
+}
+
+.lds-roller div:nth-child(3) {
+  animation-delay: -0.108s;
+}
+
+.lds-roller div:nth-child(3):after {
+  top: calc(var(--size) * 0.8875);
+  left: calc(var(--size) * 0.6);
+}
+
+.lds-roller div:nth-child(4) {
+  animation-delay: -0.144s;
+}
+
+.lds-roller div:nth-child(4):after {
+  top: calc(var(--size) * 0.9);
+  left: calc(var(--size) * 0.5);
+}
+
+.lds-roller div:nth-child(5) {
+  animation-delay: -0.18s;
+}
+
+.lds-roller div:nth-child(5):after {
+  top: calc(var(--size) * 0.8875);
+  left: calc(var(--size) * 0.4);
+}
+
+.lds-roller div:nth-child(6) {
+  animation-delay: -0.216s;
+}
+
+.lds-roller div:nth-child(6):after {
+  top: calc(var(--size) * 0.85);
+  left: calc(var(--size) * 0.3);
+}
+
+.lds-roller div:nth-child(7) {
+  animation-delay: -0.252s;
+}
+
+.lds-roller div:nth-child(7):after {
+  top: calc(var(--size) * 0.7875);
+  left: calc(var(--size) * 0.2125);
+}
+
+.lds-roller div:nth-child(8) {
+  animation-delay: -0.288s;
+}
+
+.lds-roller div:nth-child(8):after {
+  top: calc(var(--size) * 0.7);
+  left: calc(var(--size) * 0.15);
+}
+
+@keyframes lds-roller {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

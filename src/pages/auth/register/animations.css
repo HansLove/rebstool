@@ -1,0 +1,19 @@
+/* Wallet input animations */
+.wallet-input-container {
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.wallet-input-visible {
+  opacity: 1;
+  max-height: 200px;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.wallet-input-hidden {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}

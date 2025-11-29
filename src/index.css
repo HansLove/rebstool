@@ -1,0 +1,504 @@
+
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* NOWPayments Modal Customization */
+:root {
+  /* Light theme colors for NOWPayments modal */
+  --np-primary: #3b82f6; /* Blue-500 */
+  --np-primary-hover: #2563eb; /* Blue-600 */
+  --np-primary-active: #1d4ed8; /* Blue-700 */
+  --np-secondary: #64748b; /* Slate-500 */
+  --np-accent: #10b981; /* Emerald-500 */
+  --np-accent-hover: #059669; /* Emerald-600 */
+  --np-modal-in-height: 650px;
+
+  /* Surface Colors */
+  --np-surface: #ffffff; /* White background */
+  --np-surface-variant: #f8fafc; /* Slate-50 */
+  --np-surface-hover: #f1f5f9; /* Slate-100 */
+
+  /* Text Colors */
+  --np-on-surface: #1f2937; /* Gray-800 */
+  --np-on-surface-variant: #64748b; /* Slate-500 */
+  --np-on-primary: #ffffff; /* White */
+
+  /* Status Colors */
+  --np-error: #ef4444; /* Red-500 */
+  --np-error-hover: #dc2626; /* Red-600 */
+  --np-success: #10b981; /* Emerald-500 */
+  --np-success-hover: #059669; /* Emerald-600 */
+  --np-warning: #f59e0b; /* Amber-500 */
+  --np-warning-hover: #d97706; /* Amber-600 */
+
+  /* Border & Outline */
+  --np-border: #e2e8f0; /* Slate-200 */
+  --np-border-variant: #cbd5e1; /* Slate-300 */
+  --np-outline: #94a3b8; /* Slate-400 */
+}
+
+.dark {
+  /* Dark theme colors for NOWPayments modal with high contrast - Masculine & Mature Palette */
+  --np-primary: #3b82f6; /* Blue-500 - Professional blue */
+  --np-primary-hover: #2563eb; /* Blue-600 */
+  --np-primary-active: #1e40af; /* Blue-800 - Darker, more mature */
+  --np-secondary: #cbd5e1; /* Slate-300 */
+  --np-accent: #059669; /* Emerald-600 - Darker green for maturity */
+  --np-accent-hover: #047857; /* Emerald-700 */
+  --np-modal-min-height: 650px;
+
+  /* Surface Colors */
+  --np-surface: #0f172a; /* Slate-900 - más oscuro para mayor contraste */
+  --np-surface-variant: #020617; /* Slate-950 - muy oscuro */
+  --np-surface-hover: #1e293b; /* Slate-800 */
+
+  /* Text Colors */
+  --np-on-surface: #ffffff; /* Blanco puro para máximo contraste */
+  --np-on-surface-variant: #cbd5e1; /* Slate-300 - más claro */
+  --np-on-primary: #ffffff; /* White */
+
+  /* Status Colors */
+  --np-error: #f87171; /* Red-400 - más suave pero visible */
+  --np-error-hover: #ef4444; /* Red-500 */
+  --np-success: #34d399; /* Emerald-400 */
+  --np-success-hover: #10b981; /* Emerald-500 */
+  --np-warning: #fbbf24; /* Amber-400 - más brillante */
+  --np-warning-hover: #f59e0b; /* Amber-500 */
+
+  /* Border & Outline */
+  --np-border: #475569; /* Slate-600 - más claro para visibilidad */
+  --np-border-variant: #64748b; /* Slate-500 */
+  --np-outline: #94a3b8; /* Slate-400 */
+}
+
+/* Custom animations for elegant login */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Smooth focus transitions */
+.focus-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Elegant shadows */
+.shadow-elegant {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-elegant-hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Enhanced performance utilities */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Smooth scrolling for content areas */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced backdrop blur for modern browsers */
+.backdrop-blur-enhanced {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Professional hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth sidebar transitions */
+.sidebar-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced focus states */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-2;
+}
+
+/* Professional button states */
+.btn-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover:hover {
+  transform: translateY(-1px);
+}
+
+.btn-hover:active {
+  transform: translateY(0);
+}
+
+/* Smooth content transitions */
+.content-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced mobile responsiveness */
+.mobile-optimized {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #2563eb; /* Blue-600 - Professional blue instead of purple */
+}
+
+.apex-tooltip-dark {
+  background-color: #0f172a !important; /* slate-900 */
+  color: white !important;
+  border: none !important;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.apex-tooltip-dark .apexcharts-tooltip-title {
+  background-color: #0f172a !important; /* slate-900 */
+  color: white !important;
+  border: none !important;
+}
+
+@property --border-angle {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: "<angle>";
+}
+
+@layer utilities {
+  @keyframes border {
+    to {
+      --border-angle: 360deg;
+    }
+  }
+
+  .animate-border {
+    animation: border 16s linear infinite;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    /* background-color: #ffffff; */
+  }
+  a:hover {
+    color: #2563eb; /* Blue-600 - Professional blue */
+  }
+}
+
+/* Scrollbar general */
+::-webkit-scrollbar {
+  width: 6px; /* Grosor vertical */
+  height: 6px; /* Grosor horizontal */
+}
+
+/* Track (fondo del scroll) */
+::-webkit-scrollbar-track {
+  background: transparent; /* O un color tenue */
+}
+
+/* Thumb (la barra que se mueve) */
+::-webkit-scrollbar-thumb {
+  background-color: #64748b; /* Slate-500 */
+  border-radius: 8px;
+}
+
+/* Al hacer hover en la barra */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #475569; /* Slate-600 */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.boton-user {
+  background-color: #f4f4f4;
+  border-radius: 100px;
+  box-shadow: rgba(44, 142, 187, 0.2) 0 -25px 18px -14px inset,
+    rgba(44, 96, 187, 0.15) 0 1px 2px, rgba(44, 96, 187, 0.15) 0 2px 4px,
+    rgba(44, 130, 187, 0.15) 0 4px 8px, rgba(44, 130, 187, 0.15) 0 8px 16px,
+    rgba(44, 118, 187, 0.15) 0 16px 32px;
+  color: rgb(53, 53, 53);
+  cursor: pointer;
+  display: inline-block;
+  font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;
+  padding: 7px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 250ms;
+  border: 1;
+  border-width: 1px;
+  border-color: #53d5f2;
+  font-size: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.boton-user:hover {
+  box-shadow: rgba(44, 127, 187, 0.35) 0 -25px 18px -14px inset,
+    rgba(44, 115, 187, 0.25) 0 1px 2px, rgba(44, 127, 187, 0.25) 0 2px 4px,
+    rgba(44, 139, 187, 0.25) 0 4px 8px, rgba(44, 127, 187, 0.25) 0 8px 16px,
+    rgba(44, 127, 187, 0.25) 0 16px 32px;
+  transform: scale(1.05);
+}
+
+.dark .boton-user {
+  background-color: #1e293b; /* o el color oscuro que tú quieras */
+  color: #ffffff;
+  border-color: #3b82f6; /* Blue-500 - Professional blue instead of indigo */
+}
+
+.boton {
+  background-color: #f4f4f4;
+  border-radius: 100px;
+  box-shadow: rgba(37, 99, 235, 0.2) 0 -25px 18px -14px inset,
+    rgba(30, 64, 175, 0.15) 0 1px 2px, rgba(37, 99, 235, 0.15) 0 2px 4px,
+    rgba(30, 64, 175, 0.15) 0 4px 8px, rgba(37, 99, 235, 0.15) 0 8px 16px,
+    rgba(30, 64, 175, 0.15) 0 16px 32px;
+  color: rgb(53, 53, 53);
+  cursor: pointer;
+  display: inline-block;
+  font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;
+  padding: 7px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 250ms;
+  border: 1;
+  border-width: 1px;
+  border-color: #2563eb; /* Blue-600 - Professional blue */
+  font-size: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.dark .boton {
+  background-color: #1e293b; 
+  color: #ffffff;
+  border-color: #3b82f6; /* Blue-500 - Professional blue */
+}
+
+.boton:hover {
+  box-shadow: rgba(37, 99, 235, 0.35) 0 -25px 18px -14px inset,
+    rgba(30, 64, 175, 0.25) 0 1px 2px, rgba(37, 99, 235, 0.25) 0 2px 4px,
+    rgba(30, 64, 175, 0.25) 0 4px 8px, rgba(37, 99, 235, 0.25) 0 8px 16px,
+    rgba(30, 64, 175, 0.25) 0 16px 32px;
+  transform: scale(1.05);
+}
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-shine {
+  animation: shine 3s infinite ease;
+  animation-delay: 0.5s;
+}
+
+.textcolor {
+  background-image: linear-gradient(to top left, #1e293b, #2563eb, #475569);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.floating-circle {
+  position: fixed;
+  top: -20px; /* Distancia desde la parte superior */
+  right: -220px; /* Distancia desde la parte derecha */
+  width: 500px; /* Tamaño mayor para hacer la mancha más grande */
+  height: 500px; /* Tamaño mayor para hacer la mancha más grande */
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.8) 20%,
+    rgba(37, 99, 235, 0) 80% /* Blue-600 - Professional blue instead of purple */
+  );
+  border-radius: 50%; /* Para mantener una forma circular */
+  filter: blur(60px); /* Efecto de difuminado fuerte */
+  animation: float 5s ease-in-out infinite; /* Animación de flotación */
+}
+
+.floating-circle2 {
+  position: fixed;
+  bottom: -20px; /* Distancia desde la parte superior */
+  left: -220px; /* Distancia desde la parte derecha */
+  width: 500px; /* Tamaño mayor para hacer la mancha más grande */
+  height: 500px; /* Tamaño mayor para hacer la mancha más grande */
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.8) 20%,
+    rgba(37, 99, 235, 0) 80% /* Blue-600 - Professional blue instead of purple */
+  );
+  border-radius: 50%; /* Para mantener una forma circular */
+  filter: blur(60px); /* Efecto de difuminado fuerte */
+  animation: float 5s ease-in-out infinite; /* Animación de flotación */
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-120px); /* Movimiento hacia arriba más suave */
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Cambiar color a blanco en el tema oscuro */
+@media (prefers-color-scheme: dark) {
+  .floating-circle {
+    background: radial-gradient(
+      circle,
+      rgba(30, 64, 175, 0.6) 20%, /* Blue-800 - Darker professional blue */
+      rgba(255, 255, 255, 0) 80%
+    );
+  }
+
+  .floating-circle2 {
+    background: radial-gradient(
+      circle,
+      rgba(37, 99, 235, 0.6) 20%, /* Blue-600 - Professional blue */
+      rgba(255, 255, 255, 0) 80%
+    );
+  }
+}
+
+/* Usando Tailwind (si aplicas clases en JSX/HTML): */
+.dark .floating-circle {
+  background: radial-gradient(
+    circle,
+    rgba(30, 64, 175, 0.6) 20%, /* Blue-800 - Darker professional blue */
+    rgba(255, 255, 255, 0) 80%
+  );
+}
+
+.dark .floating-circle2 {
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.6) 20%, /* Blue-600 - Professional blue */
+    rgba(255, 255, 255, 0) 80%
+  );
+}
+
+.floating-top-center {
+  position: fixed;
+  top: -650px; /* Lo subimos un poco para que solo se vea la parte difusa */
+  left: 50%; /* Centrado horizontal */
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 1000px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.5) 20%,
+    rgba(37, 99, 235, 0) 80% /* Blue-600 - Professional blue instead of purple */
+  );
+  border-radius: 50%;
+  filter: blur(100px); /* Difuminado fuerte */
+  pointer-events: none; /* Para que no interfiera con clicks */
+  z-index: 0; /* Ajusta si necesitas que esté detrás del contenido */
+}
+
+@media (prefers-color-scheme: dark) {
+  .floating-top-center {
+    background: radial-gradient(
+      circle,
+      rgba(30, 64, 175, 0.4) 20%, /* Blue-800 - Darker professional blue */
+      rgba(255, 255, 255, 0) 80%
+    );
+  }
+}
+
+/* O con Tailwind dark mode si usas esa estrategia */
+.dark .floating-top-center {
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.4) 20%, /* Blue-600 - Professional blue */
+    rgba(255, 255, 255, 0) 80%
+  );
+}
+
+@keyframes shine {
+  100% {
+    left: 125%;
+  }
+}
+.animate-shine {
+  animation: shine 1.5s ease-in-out;
+}
