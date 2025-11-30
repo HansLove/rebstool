@@ -1,49 +1,111 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useVantageScraper } from "../hooks/useVantageScraper";
 import useAuth from "@/core/hooks/useAuth";
 import {
   RefreshCw,
   AlertCircle,
   Users,
-  TrendingUp,
   TrendingDown,
-  Trash2,
-  // Eye,
-  // EyeOff,
+  DollarSign,
+  ChevronDown,
+  ChevronUp,
+  Search,
 } from "lucide-react";
-import type { VantageCredentials, RetailClient } from "../types";
+import type { VantageCredentials } from "../types";
 import { format } from "date-fns";
-import FinancialMetrics from "./FinancialMetrics";
-import SnapshotComparison from "./SnapshotComparison";
-import RecentActivity from "./RecentActivity";
 import RebateUserSearch from "./RebateUserSearch";
-import SnapshotTimeline from "./SnapshotTimeline";
-import AlertActions from "./AlertActions";
 
 export default function VantageScraperDashboard() {
   const { getUser } = useAuth();
   const user = getUser();
-  const isAdmin = user?.rol === 1; // Admin role check
+  const isAdmin = user?.rol === 1;
 
   const {
     currentSnapshot,
-    previousSnapshot,
     comparisonResult,
-    snapshots,
     isLoading,
     error,
     runScraper,
-    clearSnapshots,
     lastExecutionTime,
   } = useVantageScraper();
 
-  const [credentials, setCredentials] = useState<VantageCredentials>({
+  const [credentials] = useState<VantageCredentials>({
     username: "",
     password: "",
   });
-  const [showCredentials, ] = useState(false);
 
-  // Check if user is admin
+  const [expandedSections, setExpandedSections] = useState<{
+    disappeared: boolean;
+    lostMoney: boolean;
+    withdrawals: boolean;
+  }>({
+    disappeared: false,
+    lostMoney: false,
+    withdrawals: false,
+  });
+
+  // Calculate users who lost significant money (>$500 loss)
+  const usersWhoLostMoney = useMemo(() => {
+    if (!comparisonResult) return [];
+    return comparisonResult.changedUsers
+      .filter((changedUser) => {
+        const equityChange = changedUser.changes.find((c) => c.field === "equity");
+        if (!equityChange) return false;
+        const oldEquity = equityChange.oldValue as number;
+        const newEquity = equityChange.newValue as number;
+        const loss = oldEquity - newEquity;
+        return loss > 500 && oldEquity > 100; // Lost more than $500 and had at least $100
+      })
+      .map((changedUser) => {
+        const equityChange = changedUser.changes.find((c) => c.field === "equity")!;
+        const oldEquity = equityChange.oldValue as number;
+        const newEquity = equityChange.newValue as number;
+        return {
+          ...changedUser.user,
+          loss: oldEquity - newEquity,
+          oldEquity,
+          newEquity,
+        };
+      })
+      .sort((a, b) => b.loss - a.loss); // Sort by biggest loss first
+  }, [comparisonResult]);
+
+  // Calculate critical withdrawals (>$1000 withdrawn)
+  const criticalWithdrawals = useMemo(() => {
+    if (!comparisonResult) return [];
+    return comparisonResult.changedUsers
+      .filter((changedUser) => {
+        const equityChange = changedUser.changes.find((c) => c.field === "equity");
+        if (!equityChange) return false;
+        const oldEquity = equityChange.oldValue as number;
+        const newEquity = equityChange.newValue as number;
+        const withdrawal = oldEquity - newEquity;
+        return withdrawal > 1000 && oldEquity > 1000; // Withdrew more than $1000 and had at least $1000
+      })
+      .map((changedUser) => {
+        const equityChange = changedUser.changes.find((c) => c.field === "equity")!;
+        const oldEquity = equityChange.oldValue as number;
+        const newEquity = equityChange.newValue as number;
+        return {
+          ...changedUser.user,
+          withdrawal: oldEquity - newEquity,
+          oldEquity,
+          newEquity,
+        };
+      })
+      .sort((a, b) => b.withdrawal - a.withdrawal); // Sort by biggest withdrawal first
+  }, [comparisonResult]);
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const formatCurrency = (amount: number) =>
+    `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
   if (!isAdmin) {
     return (
       <div className="w-full max-w-9xl mx-auto py-8 px-4 lg:px-6">
@@ -76,256 +138,140 @@ export default function VantageScraperDashboard() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 lg:px-6">
-      {/* Actions Panel - Fixed at top */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm mb-6 -mx-4 lg:-mx-6 px-4 lg:px-6 py-4">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+    <div className="w-full max-w-[1600px] mx-auto px-3 lg:px-4">
+      {/* Header Actions */}
+      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm mb-4 -mx-3 lg:-mx-4 px-3 lg:px-4 py-3">
+        <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Snapshot Management
-            </h2>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Vantage Dashboard
+            </h1>
             {lastExecutionTime && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Last capture: {formatDate(lastExecutionTime)}
               </p>
             )}
           </div>
-
-          <div className="flex gap-3">
-            {/* <button
-              onClick={() => setShowCredentials(!showCredentials)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              {showCredentials ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              {showCredentials ? "Hide" : "Show"} Credentials
-            </button> */}
-
-            <button
-              onClick={handleRunScraper}
-              disabled={isLoading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-              />
-              {isLoading ? "Capturing..." : "Capture Snapshot"}
-            </button>
-
-            {snapshots.length > 0 && (
-              <button
-                onClick={() => {
-                  if (
-                    confirm(
-                      "Are you sure you want to clear all snapshots? This action cannot be undone."
-                    )
-                  ) {
-                    clearSnapshots();
-                  }
-                }}
-                className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Clear Snapshots
-              </button>
-            )}
-          </div>
+          <button
+            onClick={handleRunScraper}
+            disabled={isLoading}
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm font-medium"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            {isLoading ? "Capturing..." : "Capture Snapshot"}
+          </button>
         </div>
-
-        {/* Credentials Form */}
-        {showCredentials && (
-          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Optional: Provide credentials to override environment variables
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  value={credentials.username || ""}
-                  onChange={(e) =>
-                    setCredentials({ ...credentials, username: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                  placeholder="Leave empty to use env vars"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={credentials.password || ""}
-                  onChange={(e) =>
-                    setCredentials({ ...credentials, password: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                  placeholder="Leave empty to use env vars"
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-
-      <div className="space-y-6 pt-2">
-      {/* Snapshot Timeline */}
-      <SnapshotTimeline
-        currentSnapshot={currentSnapshot}
-        previousSnapshot={previousSnapshot}
-      />
- {/* Financial Metrics */}
- {currentSnapshot && <FinancialMetrics snapshot={currentSnapshot} />}
-      {/* Search Bar */}
-      <RebateUserSearch currentSnapshot={currentSnapshot} />
-
- {/* Alert Actions - Focused on Communication and Immediate Action */}
- {comparisonResult && (
-        <AlertActions comparisonResult={comparisonResult} />
-      )}
-
-
-      {/* Snapshot Comparison */}
-      {previousSnapshot && currentSnapshot && (
-        <SnapshotComparison previous={previousSnapshot} current={currentSnapshot} />
-      )}
 
       {/* Error Display */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
           <div className="flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
             <div>
-              <p className="font-semibold text-red-900 dark:text-red-100">
-                Error
-              </p>
-              <p className="text-sm text-red-700 dark:text-red-300">
-                {error.message}
-              </p>
+              <p className="font-semibold text-red-900 dark:text-red-100">Error</p>
+              <p className="text-sm text-red-700 dark:text-red-300">{error.message}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Comparison Results */}
-      {comparisonResult && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Changes Detected
-          </h2>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6  ">
-            {comparisonResult.summary.totalNew > 0 && (
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      New Users
-                    </p>
-                    <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                      {comparisonResult.summary.totalNew}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {comparisonResult.summary.totalRemoved > 0 && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
-                  <div>
-                    <p className="text-sm text-red-700 dark:text-red-300">
-                      Removed Users
-                    </p>
-                    <p className="text-2xl font-bold text-red-900 dark:text-red-100">
-                      {comparisonResult.summary.totalRemoved}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {comparisonResult.summary.totalChanged > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-                  <div>
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                      Changed Users
-                    </p>
-                    <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
-                      {comparisonResult.summary.totalChanged}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* New Users */}
-          {comparisonResult.newUsers.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-green-700 dark:text-green-400 mb-3">
-                New Users ({comparisonResult.newUsers.length})
-              </h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {comparisonResult.newUsers.map((user) => (
-                  <UserCard key={user.userId} user={user} type="new" />
-                ))}
-              </div>
+      {/* Main 4 Sections Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {/* 1. Disappeared Users */}
+        <MetricCard
+          title="Disappeared Users"
+          count={comparisonResult?.removedUsers?.length || 0}
+          icon={<Users className="h-5 w-5" />}
+          color="red"
+          isExpanded={expandedSections.disappeared}
+          onToggle={() => toggleSection("disappeared")}
+        >
+          {comparisonResult && comparisonResult.removedUsers.length > 0 ? (
+            <div className="space-y-2">
+              {comparisonResult.removedUsers.map((user) => (
+                <UserRow
+                  key={user.userId}
+                  name={user.name}
+                  userId={user.userId}
+                  metric={`Equity: ${formatCurrency(user.equity)}`}
+                />
+              ))}
             </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+              No users disappeared
+            </p>
           )}
+        </MetricCard>
 
-          {/* Removed Users */}
-          {comparisonResult.removedUsers.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-3">
-                Removed Users ({comparisonResult.removedUsers.length})
-              </h3>
-              <div className="space-y-2">
-                {comparisonResult.removedUsers.map((user) => (
-                  <UserCard key={user.userId} user={user} type="removed" />
-                ))}
-              </div>
+        {/* 2. Users Who Lost Money */}
+        <MetricCard
+          title="Significant Losses"
+          count={usersWhoLostMoney.length}
+          icon={<TrendingDown className="h-5 w-5" />}
+          color="orange"
+          isExpanded={expandedSections.lostMoney}
+          onToggle={() => toggleSection("lostMoney")}
+        >
+          {usersWhoLostMoney.length > 0 ? (
+            <div className="space-y-2">
+              {usersWhoLostMoney.map((user) => (
+                <UserRow
+                  key={user.userId}
+                  name={user.name}
+                  userId={user.userId}
+                  metric={`Loss: ${formatCurrency(user.loss)}`}
+                  subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
+                />
+              ))}
             </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+              No significant losses detected
+            </p>
           )}
+        </MetricCard>
 
-        </div>
-      )}
-
-     
-
-      {/* Recent Activity - Top Deposits and Top Equity */}
-      {currentSnapshot && <RecentActivity snapshot={currentSnapshot} />}
-
-      {/* Current Snapshot Info */}
-      {currentSnapshot && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Latest Snapshot
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">Timestamp:</span>
-              <span className="ml-2 font-medium text-gray-900 dark:text-white">
-                {formatDate(currentSnapshot.timestamp)}
-              </span>
+        {/* 3. Critical Withdrawals */}
+        <MetricCard
+          title="Critical Withdrawals"
+          count={criticalWithdrawals.length}
+          icon={<DollarSign className="h-5 w-5" />}
+          color="purple"
+          isExpanded={expandedSections.withdrawals}
+          onToggle={() => toggleSection("withdrawals")}
+        >
+          {criticalWithdrawals.length > 0 ? (
+            <div className="space-y-2">
+              {criticalWithdrawals.map((user) => (
+                <UserRow
+                  key={user.userId}
+                  name={user.name}
+                  userId={user.userId}
+                  metric={`Withdrawn: ${formatCurrency(user.withdrawal)}`}
+                  subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
+                />
+              ))}
             </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">Snapshot ID:</span>
-              <span className="ml-2 font-mono text-xs text-gray-900 dark:text-white">
-                {currentSnapshot.id}
-              </span>
-            </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+              No critical withdrawals detected
+            </p>
+          )}
+        </MetricCard>
+
+        {/* 4. Search Bar */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Search className="h-5 w-5 text-blue-500" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              User Search
+            </h3>
           </div>
+          <RebateUserSearch currentSnapshot={currentSnapshot} />
         </div>
-      )}
+      </div>
 
       {/* No Data State */}
       {!currentSnapshot && !isLoading && (
@@ -339,49 +285,125 @@ export default function VantageScraperDashboard() {
           </p>
         </div>
       )}
-      </div>
     </div>
   );
 }
 
-// User Card Component
-function UserCard({
-  user,
-  type,
-}: {
-  user: RetailClient;
-  type: "new" | "removed";
-}) {
-  const bgColor =
-    type === "new"
-      ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-      : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800";
+// Metric Card Component
+interface MetricCardProps {
+  title: string;
+  count: number;
+  icon: React.ReactNode;
+  color: "red" | "orange" | "purple" | "blue";
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+function MetricCard({
+  title,
+  count,
+  icon,
+  color,
+  isExpanded,
+  onToggle,
+  children,
+}: MetricCardProps) {
+  const colorClasses = {
+    red: {
+      bg: "bg-red-50 dark:bg-red-900/20",
+      border: "border-red-200 dark:border-red-800",
+      text: "text-red-600 dark:text-red-400",
+      number: "text-red-600 dark:text-red-400",
+    },
+    orange: {
+      bg: "bg-orange-50 dark:bg-orange-900/20",
+      border: "border-orange-200 dark:border-orange-800",
+      text: "text-orange-600 dark:text-orange-400",
+      number: "text-orange-600 dark:text-orange-400",
+    },
+    purple: {
+      bg: "bg-purple-50 dark:bg-purple-900/20",
+      border: "border-purple-200 dark:border-purple-800",
+      text: "text-purple-600 dark:text-purple-400",
+      number: "text-purple-600 dark:text-purple-400",
+    },
+    blue: {
+      bg: "bg-blue-50 dark:bg-blue-900/20",
+      border: "border-blue-200 dark:border-blue-800",
+      text: "text-blue-600 dark:text-blue-400",
+      number: "text-blue-600 dark:text-blue-400",
+    },
+  };
+
+  const colors = colorClasses[color];
 
   return (
     <div
-      className={`${bgColor} border rounded-lg p-4 text-sm`}
+      className={`${colors.bg} ${colors.border} border rounded-xl overflow-hidden transition-all cursor-pointer hover:shadow-md`}
+      onClick={onToggle}
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <div>
-          <span className="text-gray-600 dark:text-gray-400">Name:</span>
-          <span className="ml-2 font-medium text-gray-900 dark:text-white">
-            {user.name}
-          </span>
+      {/* Header */}
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
+          <div className={colors.text}>{icon}</div>
+          <div className="flex-1">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+              {title}
+            </h3>
+            <p className={`text-3xl font-bold mt-1 ${colors.number}`}>{count}</p>
+          </div>
         </div>
-        <div>
-          <span className="text-gray-600 dark:text-gray-400">User ID:</span>
-          <span className="ml-2 font-mono text-gray-900 dark:text-white">
-            {user.userId}
-          </span>
-        </div>
-        <div>
-          <span className="text-gray-600 dark:text-gray-400">Equity:</span>
-          <span className="ml-2 font-medium text-gray-900 dark:text-white">
-            ${user.equity.toFixed(2)}
-          </span>
-        </div>
+        <button
+          className={`p-1 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors ${colors.text}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+        >
+          {isExpanded ? (
+            <ChevronUp className="h-5 w-5" />
+          ) : (
+            <ChevronDown className="h-5 w-5" />
+          )}
+        </button>
       </div>
+
+      {/* Expandable Content */}
+      {isExpanded && (
+        <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4 max-h-96 overflow-y-auto">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
 
+// User Row Component
+interface UserRowProps {
+  name: string;
+  userId: number;
+  metric: string;
+  subMetric?: string;
+}
+
+function UserRow({ name, userId, metric, subMetric }: UserRowProps) {
+  return (
+    <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          {name}
+        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+          ID: {userId}
+        </p>
+        {subMetric && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{subMetric}</p>
+        )}
+      </div>
+      <div className="text-right ml-2 shrink-0">
+        <p className="text-sm font-bold text-gray-900 dark:text-white">{metric}</p>
+      </div>
+    </div>
+  );
+}

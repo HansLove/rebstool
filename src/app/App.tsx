@@ -22,7 +22,7 @@ function App() {
   }
 
   const config = getDefaultConfig({
-    appName: 'Affill',
+    appName: 'Rebtools',
     chains: [mainnet, polygon, optimism, arbitrum, base],
     projectId,
     storage: createStorage({

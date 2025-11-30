@@ -9,7 +9,7 @@ The Sub-Affiliate section has been completely refactored for better organization
 ## 🎯 Key Features
 
 ### 1. New Unified Dashboard
-Access the new `AffillOneViewWireframe` at:
+Access the new `RebtoolsOneViewWireframe` at:
 ```
 /subs/one-view
 ```
@@ -43,7 +43,7 @@ import { SubsLayoutContext } from "@/layouts/types/subsLayout.types";
 
 | File | Purpose |
 |------|---------|
-| `src/pages/SubAffiliates/dashboard/AffillOneViewWireframe.tsx` | New unified dashboard |
+| `src/pages/SubAffiliates/dashboard/RebtoolsOneViewWireframe.tsx` | New unified dashboard |
 | `src/app/routes/subsRoutes.config.ts` | Route constants & configuration |
 | `src/layouts/hooks/useSubsDashboardData.ts` | Custom data fetching hook |
 | `src/layouts/types/subsLayout.types.ts` | TypeScript type definitions |
@@ -130,9 +130,9 @@ export default function MyComponent() {
 
 ```
 /subs/
-  ├── dashboard              (SubAffilliateResume)
-  ├── resume                 (SubAffilliateResume)
-  ├── one-view               (AffillOneViewWireframe) ⭐ NEW
+  ├── dashboard              (SubRebtoolsiateResume)
+  ├── resume                 (SubRebtoolsiateResume)
+  ├── one-view               (RebtoolsOneViewWireframe) ⭐ NEW
   ├── yourEarnings           (PaymentsRegistersTable)
   ├── payouts                (Payouts)
   ├── performance            (Performance)
@@ -140,7 +140,7 @@ export default function MyComponent() {
   ├── sub/registrations      (MyRegistration)
   ├── marketing              (MarketingLab)
   ├── sub-affiliate-tutorial (SubAffiliateTutorial)
-  └── yourConfig             (SubsAffilliatesSettings)
+  └── yourConfig             (SubsRebtoolsiatesSettings)
 ```
 
 ---

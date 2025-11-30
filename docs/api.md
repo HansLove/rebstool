@@ -1,211 +1,256 @@
-# API Documentation & Integration Patterns
-
-This document covers API communication patterns, service layer architecture, and data integration guidelines for the Affill platform.
-
-## Service Layer Architecture
-
-### HTTP Client Configuration
-
-The application uses Axios as the primary HTTP client with interceptors for authentication and error handling:
-
-**Location**: `src/services/` (inferred from architecture)
-**Pattern**: Centralized request handling with token injection
-
-### Authentication Flow
-
-**Token Management**:
-```typescript
-// From src/core/hooks/useAuth.tsx
-interface AuthUserInterface {
-  token: string | null;
-  setToken: (user: any, token: string) => void;
-  getToken: () => string | null;
-  isLoggedIn: () => boolean;
-  logout: () => void;
+{
+    "success": true,
+    "data": {
+        "snapshots": [
+            {
+                "id": "snapshot_1764451096914",
+                "timestamp": 1764451096914,
+                "scraped_at": "2025-11-29T21:18:17.000Z",
+                "total_accounts": 2,
+                "total_retail_clients": 836,
+                "createdAt": "2025-11-29T21:18:17.000Z",
+                "updatedAt": "2025-11-29T21:18:17.000Z",
+                "VantageAccounts": [
+                    {
+                        "pk": 3,
+                        "vantage_id": 5187917,
+                        "snapshot_id": "snapshot_1764451096914",
+                        "userId": 6231442,
+                        "accountDealType": null,
+                        "login": 7362408,
+                        "currency": "USD",
+                        "commission": 0,
+                        "dataSourceId": 401,
+                        "balance": 99.19,
+                        "mtAccountType": 1,
+                        "mtCategory": null,
+                        "accountDisplayType": null,
+                        "mtAccountTypeDisplay": null,
+                        "accountMt4TypeDisplay": null,
+                        "isCredit": null,
+                        "isCommissionProhibit": false,
+                        "marginLevel": 0,
+                        "profit": 0,
+                        "equity": 99.19,
+                        "credit": 0,
+                        "approvedTime": 1755614523000,
+                        "lbtCCAdjustedBalance": null,
+                        "hasNegativeBalanceNoPosition": false,
+                        "createdAt": "2025-11-29T21:18:17.000Z",
+                        "updatedAt": "2025-11-29T21:18:17.000Z"
+                    },
+                    {
+                        "pk": 4,
+                        "vantage_id": 6379798,
+                        "snapshot_id": "snapshot_1764451096914",
+                        "userId": 6231442,
+                        "accountDealType": null,
+                        "login": 7364756,
+                        "currency": "USD",
+                        "commission": 55.25,
+                        "dataSourceId": 401,
+                        "balance": 0,
+                        "mtAccountType": 13,
+                        "mtCategory": null,
+                        "accountDisplayType": null,
+                        "mtAccountTypeDisplay": null,
+                        "accountMt4TypeDisplay": null,
+                        "isCredit": null,
+                        "isCommissionProhibit": false,
+                        "marginLevel": 0,
+                        "profit": 0,
+                        "equity": 0,
+                        "credit": 0,
+                        "approvedTime": 1761563512000,
+                        "lbtCCAdjustedBalance": null,
+                        "hasNegativeBalanceNoPosition": false,
+                        "createdAt": "2025-11-29T21:18:17.000Z",
+                        "updatedAt": "2025-11-29T21:18:17.000Z"
+                    }
+                ],
+                "VantageRetailHeaders": [
+                    {
+                        "id": 3,
+                        "snapshot_id": "snapshot_1764451096914",
+                        "account_login": 7362408,
+                        "code": 0,
+                        "errmsg": null,
+                        "msg": null,
+                        "extendString": null,
+                        "extendInteger": null,
+                        "createdAt": "2025-11-29T21:18:17.000Z",
+                        "updatedAt": "2025-11-29T21:18:17.000Z",
+                        "VantageRetailClients": [
+                            {
+                                "id": 1613,
+                                "retail_header_id": 3,
+                                "registerDate": 1730492926000,
+                                "firstDepositDate": null,
+                                "firstTransferInDate": null,
+                                "date": 1763650036000,
+                                "name": "Balogun Jamiu",
+                                "accountNmber": 20933752,
+                                "email": null,
+                                "platform": 5,
+                                "accountType": 13,
+                                "baseCurrency": "USD",
+                                "accountBalance": 0,
+                                "userId": 3548532,
+                                "bPayNumber": null,
+                                "profit": null,
+                                "marginLevel": null,
+                                "equity": 0,
+                                "credit": 0,
+                                "phone": "7068990822",
+                                "poiStatus": 2,
+                                "poaStatus": 2,
+                                "fundingStatus": 0,
+                                "campaignSource": null,
+                                "campaignTitle": null,
+                                "participatedCampaigns": null,
+                                "archiveStatus": 0,
+                                "accountJourney": 3,
+                                "tagList": null,
+                                "lastTradeTime": null,
+                                "lastTradeSymbol": null,
+                                "lastTradeVolume": null,
+                                "lastDepositTime": null,
+                                "lastDepositAmount": null,
+                                "lastDepositCurrency": null,
+                                "ownerName": "Kseinja Gorodnicka",
+                                "createdAt": "2025-11-29T21:18:17.000Z",
+                                "updatedAt": "2025-11-29T21:18:17.000Z"
+                            },
+                            {
+                                "id": 1614,
+                                "retail_header_id": 3,
+                                "registerDate": 1763648359000,
+                                "firstDepositDate": null,
+                                "firstTransferInDate": null,
+                                "date": 1763653114000,
+                                "name": "Piotr Waszecki",
+                                "accountNmber": 20933856,
+                                "email": null,
+                                "platform": 5,
+                                "accountType": 13,
+                                "baseCurrency": "USD",
+                                "accountBalance": 292.76,
+                                "userId": 8493816,
+                                "bPayNumber": null,
+                                "profit": null,
+                                "marginLevel": null,
+                                "equity": 300.74,
+                                "credit": 0,
+                                "phone": "15510247977",
+                                "poiStatus": 2,
+                                "poaStatus": null,
+                                "fundingStatus": 1,
+                                "campaignSource": null,
+                                "campaignTitle": null,
+                                "participatedCampaigns": null,
+                                "archiveStatus": 0,
+                                "accountJourney": 1,
+                                "tagList": null,
+                                "lastTradeTime": 1764325023000,
+                                "lastTradeSymbol": "EURUSD",
+                                "lastTradeVolume": 0.03,
+                                "lastDepositTime": 1763828469000,
+                                "lastDepositAmount": 80,
+                                "lastDepositCurrency": "USD",
+                                "ownerName": "Kseinja Gorodnicka",
+                                "createdAt": "2025-11-29T21:18:17.000Z",
+                                "updatedAt": "2025-11-29T21:18:17.000Z"
+                            },
+                            {
+                                "id": 1615,
+                                "retail_header_id": 3,
+                                "registerDate": 1763648359000,
+                                "firstDepositDate": null,
+                                "firstTransferInDate": null,
+                                "date": 1763653196000,
+                                "name": "Piotr Waszecki",
+                                "accountNmber": 20933858,
+                                "email": null,
+                                "platform": 5,
+                                "accountType": 13,
+                                "baseCurrency": "EUR",
+                                "accountBalance": 0,
+                                "userId": 8493816,
+                                "bPayNumber": null,
+                                "profit": null,
+                                "marginLevel": null,
+                                "equity": 0,
+                                "credit": 0,
+                                "phone": "15510247977",
+                                "poiStatus": 2,
+                                "poaStatus": null,
+                                "fundingStatus": 0,
+                                "campaignSource": null,
+                                "campaignTitle": null,
+                                "participatedCampaigns": null,
+                                "archiveStatus": 0,
+                                "accountJourney": 3,
+                                "tagList": null,
+                                "lastTradeTime": null,
+                                "lastTradeSymbol": null,
+                                "lastTradeVolume": null,
+                                "lastDepositTime": null,
+                                "lastDepositAmount": null,
+                                "lastDepositCurrency": null,
+                                "ownerName": "Kseinja Gorodnicka",
+                                "createdAt": "2025-11-29T21:18:17.000Z",
+                                "updatedAt": "2025-11-29T21:18:17.000Z"
+                            },
+                            {
+                                "id": 1616,
+                                "retail_header_id": 3,
+                                "registerDate": 1763659168000,
+                                "firstDepositDate": null,
+                                "firstTransferInDate": null,
+                                "date": 1763659411000,
+                                "name": "Isaiah  shogo",
+                                "accountNmber": 20934060,
+                                "email": null,
+                                "platform": 5,
+                                "accountType": 13,
+                                "baseCurrency": "USD",
+                                "accountBalance": 0,
+                                "userId": 8496641,
+                                "bPayNumber": null,
+                                "profit": null,
+                                "marginLevel": null,
+                                "equity": 0,
+                                "credit": 0,
+                                "phone": "8102507090",
+                                "poiStatus": null,
+                                "poaStatus": null,
+                                "fundingStatus": 0,
+                                "campaignSource": null,
+                                "campaignTitle": null,
+                                "participatedCampaigns": null,
+                                "archiveStatus": 0,
+                                "accountJourney": 3,
+                                "tagList": null,
+                                "lastTradeTime": null,
+                                "lastTradeSymbol": null,
+                                "lastTradeVolume": null,
+                                "lastDepositTime": null,
+                                "lastDepositAmount": null,
+                                "lastDepositCurrency": null,
+                                "ownerName": "Kseinja Gorodnicka",
+                                "createdAt": "2025-11-29T21:18:17.000Z",
+                                "updatedAt": "2025-11-29T21:18:17.000Z"
+                            },
+                        ]
+                    }
+                ]
+            }
+        ],
+        "pagination": {
+            "page": 1,
+            "limit": 2,
+            "total": 3344,
+            "totalPages": 1672
+        }
+    }
 }
-```
-
-**Storage Strategy**:
-- JWT tokens stored in localStorage
-- User data cached locally for offline access
-- Automatic token injection via Axios interceptors
-- Token validation on app initialization
-
-### API Response Patterns
-
-**User Data Structure**:
-```typescript
-// From src/core/types/userData.ts
-interface UserDataType {
-  user_id: string;
-  registration_date: string;
-  brand: string;
-  tracking_code: string;
-  afp: string;
-  language: string;
-  type: string;
-  // ... additional fields matching API schema
-}
-```
-
-**Response Handling**:
-- Snake_case from API (matches backend conventions)
-- Direct mapping without transformation for consistency
-- Type-safe interfaces for all API responses
-
-## React Query Integration
-
-**State Management Pattern**:
-- Server state managed via @tanstack/react-query
-- Local UI state via React hooks
-- Optimistic updates for user actions
-- Background refetching for data freshness
-
-**Query Configuration**:
-```typescript
-// Recommended patterns for new API integrations
-const { data, isLoading, error } = useQuery({
-  queryKey: ['feature', userId],
-  queryFn: () => fetchFeatureData(userId),
-  staleTime: 5 * 60 * 1000, // 5 minutes
-  refetchOnWindowFocus: false,
-});
-```
-
-## Data Transformation Patterns
-
-### API Response Handling
-
-**Consistent Patterns**:
-- Preserve API field naming (snake_case) in TypeScript interfaces
-- Handle null/undefined values gracefully
-- Implement proper error boundaries for failed requests
-
-**Error Handling**:
-```typescript
-// Pattern for service functions
-const handleApiError = (error: AxiosError) => {
-  if (error.response?.status === 401) {
-    // Trigger logout and redirect
-    useAuth().logout();
-  }
-  throw new Error(error.response?.data?.message || 'Request failed');
-};
-```
-
-## Blockchain API Integration
-
-**Web3 Provider Configuration**:
-- wagmi v2 for Ethereum interactions
-- RainbowKit for wallet connection UI
-- Smart contract ABIs in `src/components/blockchain/deployments/`
-
-**Contract Integration Pattern**:
-```typescript
-// Example from blockchain components
-import { useReadContract, useWriteContract } from 'wagmi';
-
-// Read operations
-const { data: balance } = useReadContract({
-  address: contractAddress,
-  abi: contractABI,
-  functionName: 'balanceOf',
-  args: [userAddress],
-});
-
-// Write operations with transaction handling
-const { writeContract, isLoading: isTransacting } = useWriteContract();
-```
-
-## API Endpoint Organization
-
-**Feature-Based Structure**:
-```
-services/
-├── auth/           # Authentication endpoints
-├── affiliates/     # Affiliate management APIs
-├── payments/       # Payment processing
-├── analytics/      # Dashboard and reporting data
-└── blockchain/     # Smart contract interactions
-```
-
-**Request Configuration**:
-- Base URL configuration via environment variables
-- Request/response interceptors for common patterns
-- Retry logic for network failures
-- Request/response logging in development
-
-## Data Caching Strategy
-
-**React Query Configuration**:
-- User data: Long cache time (30 minutes)
-- Analytics: Medium cache time (5 minutes)
-- Real-time data: Short cache time (1 minute)
-- Static data: Cache indefinitely with manual invalidation
-
-**Cache Invalidation**:
-```typescript
-// Invalidate related queries after mutations
-const queryClient = useQueryClient();
-await queryClient.invalidateQueries(['user', 'affiliates']);
-```
-
-## Environment Configuration
-
-**API Configuration**:
-```env
-# Expected environment variables
-VITE_API_BASE_URL=https://api.affill.com
-VITE_BLOCKCHAIN_RPC_URL=https://mainnet.infura.io/v3/...
-VITE_CONTRACT_ADDRESS=0x...
-```
-
-**Development vs Production**:
-- Different API endpoints for environments
-- Feature flags via environment variables
-- Debug logging configuration
-
-## Integration Guidelines
-
-**Adding New API Endpoints**:
-
-1. **Define TypeScript Interfaces**:
-   - Create interfaces in `src/core/types/`
-   - Match API response structure exactly
-   - Use snake_case to match backend conventions
-
-2. **Create Service Function**:
-   - Add to appropriate service module
-   - Include proper error handling
-   - Return typed responses
-
-3. **Implement React Query Hook**:
-   - Create custom hook in `src/hooks/` or component-local
-   - Configure appropriate caching strategy
-   - Handle loading and error states
-
-4. **Update Components**:
-   - Replace mock data with real API calls
-   - Add proper loading states
-   - Implement error boundaries
-
-**Testing API Integration**:
-- Mock API responses for development
-- Use React Query devtools for debugging
-- Implement proper error scenarios
-
-## Security Considerations
-
-**Token Security**:
-- Automatic token refresh before expiration
-- Secure token storage (consider httpOnly cookies for production)
-- Proper logout cleanup
-
-**Request Security**:
-- HTTPS-only in production
-- Request validation and sanitization
-- Rate limiting awareness in client code
-
----
-
-*For implementation examples, see existing components in `src/components/` and `src/pages/`. This documentation should be updated as new API patterns are established.*

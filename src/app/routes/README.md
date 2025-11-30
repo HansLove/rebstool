@@ -11,7 +11,7 @@ routes/
 ├── PublicRoute.tsx            # Public route wrapper
 ├── withSuspense.tsx           # Lazy loading wrapper
 ├── routes.ts                  # Route constants
-├── affilliatesRoutes.tsx      # Master affiliate routes
+├── RebtoolsiatesRoutes.tsx      # Master affiliate routes
 ├── subsRoutes.tsx             # Sub-affiliate routes (REFACTORED)
 ├── subsRoutes.config.ts       # Route configuration (NEW)
 └── sharedRoutes.tsx           # Shared routes
@@ -27,9 +27,9 @@ Routes are now organized into logical sections:
 
 #### 🏠 CORE Routes
 Primary dashboard and overview pages
-- `dashboard` → SubAffilliateResume
-- `resume` → SubAffilliateResume  
-- `one-view` → AffillOneViewWireframe (NEW)
+- `dashboard` → SubRebtoolsiateResume
+- `resume` → SubRebtoolsiateResume  
+- `one-view` → RebtoolsOneViewWireframe (NEW)
 
 #### 💰 EARNINGS Routes
 Financial tracking and performance
@@ -46,7 +46,7 @@ User network and registration management
 Supporting tools, tutorials, and settings
 - `marketing` → MarketingLab
 - `sub-affiliate-tutorial` → SubAffiliateTutorial
-- `yourConfig` → SubsAffilliatesSettings
+- `yourConfig` → SubsRebtoolsiatesSettings
 
 ### Configuration File
 
@@ -97,7 +97,7 @@ AppRouter
 │   ├── Login
 │   └── Register
 ├── Authenticated Routes
-│   ├── Master Affiliate (affilliatesRoutes)
+│   ├── Master Affiliate (RebtoolsiatesRoutes)
 │   └── Sub-Affiliate (subsRoutes)
 └── Shared Routes
     └── Settings, etc.

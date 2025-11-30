@@ -42,7 +42,7 @@ function WalletConfigStep({ onPrevious, onSubmit, initialData, isSubmitting, err
     if (useOwnWallet && isConnected && address) {
       setValue('publicKey', address);
     } else if (!useOwnWallet && isConnected) {
-      // Desconectar wallet cuando el usuario elige que Affill la maneje
+      // Desconectar wallet cuando el usuario elige que Rebtools la maneje
       disconnect();
       setValue('publicKey', '');
     }
@@ -117,7 +117,7 @@ function WalletConfigStep({ onPrevious, onSubmit, initialData, isSubmitting, err
 
         {/* Wallet Option Selection */}
         <div className="space-y-4">
-          {/* Let Affill manage your wallet */}
+          {/* Let Rebtools manage your wallet */}
           <div
             className={`cursor-pointer rounded-lg border p-4 transition-all duration-200 ${
               !watchUseOwnWallet ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:border-blue-400' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
@@ -134,7 +134,7 @@ function WalletConfigStep({ onPrevious, onSubmit, initialData, isSubmitting, err
               <div className="flex-1">
                 <div className="flex items-center">
                   <FaWallet className="mr-2 text-gray-600 dark:text-gray-400" />
-                  <span className="font-medium text-gray-800 dark:text-gray-200">Let Affill manage it</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">Let Rebtools manage it</span>
                 </div>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                   We'll create and manage a wallet for you. You can withdraw anytime.

@@ -94,7 +94,7 @@ export default function SplashPage() {
           >
             <motion.img
               src="/assets/images/logos/min-logo.png"
-              alt="Affill Logo"
+              alt="Rebtools Logo"
               className="w-24 h-24 filter brightness-0 invert"
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -137,7 +137,7 @@ export default function SplashPage() {
             >
               <img
                 src="/assets/images/logos/min-logo.png"
-                alt="Affill Logo"
+                alt="Rebtools Logo"
                 className="w-32 h-32 mx-auto filter brightness-0 invert drop-shadow-2xl"
               />
             </motion.div>
@@ -151,7 +151,7 @@ export default function SplashPage() {
             >
               Welcome to{" "}
               <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                Affill
+                Rebtools
               </span>
             </motion.h1>
 

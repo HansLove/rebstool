@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { PlayCircle, Info, X } from "lucide-react";
 import { ScrollMotionDiv } from "./divs/ScrollMotionDiv";
 
-const TUTORIAL_STORAGE_KEY = "affill::tutorial_hidden";
+const TUTORIAL_STORAGE_KEY = "Rebtools::tutorial_hidden";
 
 export default function MiniTutorial() {
   const [isVisible, setIsVisible] = useState(false);

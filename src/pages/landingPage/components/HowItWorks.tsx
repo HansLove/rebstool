@@ -1,56 +1,55 @@
 import {
-  Wallet,
-  Share2,
-  BadgeDollarSign,
-  TrendingUp,
-  Gift,
-  ArrowDown,
+  Database,
+  Activity,
+  BarChart3,
+  Search,
+  Calendar,
   CheckCircle,
-  Sparkles,
+  ArrowDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const steps = [
   {
-    title: "Access Marketing Tools",
-    description: "Get instant access to professional marketing automation and analytics",
-    icon: <Wallet className="w-6 h-6 text-purple-500" />,
-    color: "from-purple-500 to-purple-600",
-    bgColor: "from-purple-100 to-purple-200",
-    darkBgColor: "from-purple-900/30 to-purple-800/30"
+    title: "Captura de Snapshot",
+    description: "Ejecuta el scraper para capturar datos actuales de rebates y usuarios",
+    icon: <Database className="w-6 h-6 text-sky-500" />,
+    color: "from-sky-500 to-sky-600",
+    bgColor: "from-sky-100 to-sky-200",
+    darkBgColor: "from-sky-900/30 to-sky-800/30"
   },
   {
-    title: "Join Fintech Communities",
-    description: "Connect with digital marketing and fintech professionals",
-    icon: <Share2 className="w-6 h-6 text-blue-500" />,
-    color: "from-blue-500 to-blue-600",
-    bgColor: "from-blue-100 to-blue-200",
-    darkBgColor: "from-blue-900/30 to-blue-800/30"
+    title: "Análisis de Cambios",
+    description: "Compara snapshots para detectar nuevos usuarios y cambios en equity",
+    icon: <Activity className="w-6 h-6 text-emerald-500" />,
+    color: "from-emerald-500 to-emerald-600",
+    bgColor: "from-emerald-100 to-emerald-200",
+    darkBgColor: "from-emerald-900/30 to-emerald-800/30"
   },
   {
-    title: "Build Virtual Networks",
-    description: "Scale your affiliate network with blockchain-powered tools",
-    icon: <BadgeDollarSign className="w-6 h-6 text-green-500" />,
-    color: "from-green-500 to-green-600",
-    bgColor: "from-green-100 to-green-200",
-    darkBgColor: "from-green-900/30 to-green-800/30"
+    title: "Visualización de Métricas",
+    description: "Revisa métricas financieras, depósitos y actividad de trading",
+    icon: <BarChart3 className="w-6 h-6 text-violet-500" />,
+    color: "from-violet-500 to-violet-600",
+    bgColor: "from-violet-100 to-violet-200",
+    darkBgColor: "from-violet-900/30 to-violet-800/30"
   },
   {
-    title: "Implement Proven Strategies",
-    description: "Access battle-tested marketing frameworks and tactics",
-    icon: <TrendingUp className="w-6 h-6 text-orange-500" />,
-    color: "from-orange-500 to-orange-600",
-    bgColor: "from-orange-100 to-orange-200",
-    darkBgColor: "from-orange-900/30 to-orange-800/30"
+    title: "Búsqueda y Filtrado",
+    description: "Encuentra usuarios específicos usando búsqueda avanzada y filtros",
+    icon: <Search className="w-6 h-6 text-amber-500" />,
+    color: "from-amber-500 to-amber-600",
+    bgColor: "from-amber-100 to-amber-200",
+    darkBgColor: "from-amber-900/30 to-amber-800/30"
   },
   {
-    title: "Scale Your Profits",
-    description: "Grow your digital marketing income with advanced tools",
-    icon: <Gift className="w-6 h-6 text-pink-500" />,
-    color: "from-pink-500 to-pink-600",
-    bgColor: "from-pink-100 to-pink-200",
-    darkBgColor: "from-pink-900/30 to-pink-800/30",
+    title: "Journal y Reportes",
+    description: "Accede al journal histórico y genera reportes de actividad diaria",
+    icon: <Calendar className="w-6 h-6 text-indigo-500" />,
+    color: "from-indigo-500 to-indigo-600",
+    bgColor: "from-indigo-100 to-indigo-200",
+    darkBgColor: "from-indigo-900/30 to-indigo-800/30",
     final: true
   },
 ];
@@ -58,12 +57,11 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section
-      className="relative py-24 lg:py-32 overflow-hidden"
+      className="relative py-24 lg:py-32 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-sky-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800"
       id="how-it-works"
     >
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800"></div>
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-blue-400/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-sky-400/20 to-emerald-400/20 rounded-full blur-3xl"></div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -74,15 +72,15 @@ export default function HowItWorks() {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <div className="inline-flex items-center px-4 py-2 mb-6 text-sm font-semibold text-purple-700 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Simple Process
+          <div className="inline-flex items-center px-4 py-2 mb-6 text-sm font-semibold text-sky-700 bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300 rounded-full">
+            <Activity className="w-4 h-4 mr-2" />
+            Proceso Simple
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-            How It Works?
+            ¿Cómo Funciona?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Access professional marketing tools and fintech communities in 5 simple steps
+            Monitorea y analiza rebates en 5 pasos simples con RebTools
           </p>
         </motion.div>
 
@@ -135,7 +133,7 @@ export default function HowItWorks() {
                     viewport={{ once: true }}
                     className="ml-7 mt-4"
                   >
-                    <ArrowDown className="w-5 h-5 text-purple-400" />
+                    <ArrowDown className="w-5 h-5 text-sky-400" />
                   </motion.div>
                 )}
 
@@ -146,11 +144,11 @@ export default function HowItWorks() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.5 }}
                     viewport={{ once: true }}
-                    className="ml-7 mt-4 flex items-center gap-2 text-green-500"
+                    className="ml-7 mt-4 flex items-center gap-2 text-emerald-500"
                   >
                     <CheckCircle className="w-5 h-5" />
                     <span className="text-sm font-medium">
-                      All Steps Completed
+                      Proceso Completado
                     </span>
                   </motion.div>
                 )}
@@ -166,10 +164,10 @@ export default function HowItWorks() {
               className="pt-8"
             >
               <Link
-                to="/how-it-works"
-                className="inline-flex items-center px-6 py-3 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 border-2 border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 rounded-full transition-all duration-200 group"
+                to="/login"
+                className="inline-flex items-center px-6 py-3 text-sm font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-300 dark:hover:border-sky-600 rounded-full transition-all duration-200 group"
               >
-                Learn More Details
+                Comenzar Ahora
                 <ArrowDown className="ml-2 w-4 h-4 group-hover:translate-y-1 transition-transform duration-200" />
               </Link>
             </motion.div>
@@ -187,7 +185,7 @@ export default function HowItWorks() {
               <img
                 className="w-full h-auto rounded-3xl shadow-2xl"
                 src="/assets/images/afilliate.webp"
-                alt="AFILL Platform Overview"
+                alt="RebTools Dashboard Overview"
               />
             </div>
             
@@ -200,8 +198,8 @@ export default function HowItWorks() {
               className="absolute -top-4 -right-4 bg-white dark:bg-slate-700 p-4 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Live</span>
+                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Activo</span>
               </div>
             </motion.div>
             
@@ -210,16 +208,16 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               viewport={{ once: true }}
-              className="absolute -bottom-4 -left-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white p-3 rounded-2xl shadow-lg"
+              className="absolute -bottom-4 -left-4 bg-gradient-to-r from-sky-500 to-emerald-500 text-white p-3 rounded-2xl shadow-lg"
             >
               <div className="text-center">
-                <div className="text-lg font-bold">$2K+</div>
-                <div className="text-xs opacity-90">Monthly</div>
+                <div className="text-lg font-bold">Tiempo Real</div>
+                <div className="text-xs opacity-90">Análisis Continuo</div>
               </div>
             </motion.div>
             
             {/* Background glow */}
-            <div className="absolute -inset-8 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-3xl blur-3xl -z-10"></div>
+            <div className="absolute -inset-8 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 rounded-3xl blur-3xl -z-10"></div>
           </motion.div>
         </div>
       </div>

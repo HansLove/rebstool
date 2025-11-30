@@ -3,7 +3,7 @@ import { http } from "@/core/utils/http_request";
 
 /**
  * User activity data structure from API
- * Combines broker activity data with internal Affill funds
+ * Combines broker activity data with internal Rebtools funds
  */
 interface UserActivityData {
   // Broker activity fields (from ActivityReport)
@@ -14,7 +14,7 @@ interface UserActivityData {
   Volume?: number;
   [key: string]: any; // Other fields from ActivityReport.toJSON()
 
-  // Internal Affill funds (from UserBalanceView)
+  // Internal Rebtools funds (from UserBalanceView)
   internal_deposits: number;
   internal_withdrawals: number;
   internal_balance: number;

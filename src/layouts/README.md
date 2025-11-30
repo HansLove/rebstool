@@ -78,7 +78,7 @@ Routes are defined in `src/app/routes/subsRoutes.tsx` and organized into logical
 ### Core Routes
 - `dashboard` - Main dashboard view
 - `resume` - Resume overview
-- `one-view` - New unified dashboard (AffillOneViewWireframe)
+- `one-view` - New unified dashboard (RebtoolsOneViewWireframe)
 
 ### Earnings Routes
 - `yourEarnings` - Earnings details

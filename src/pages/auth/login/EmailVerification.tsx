@@ -63,7 +63,7 @@ const EmailVerification = () => {
           {/* Brand */}
           <div className="mb-6">
             <Link to="/" className="inline-flex items-center justify-center gap-2 textcolor text-2xl font-extrabold tracking-tight">
-              Affill
+              Rebtools
             </Link>
           </div>
 

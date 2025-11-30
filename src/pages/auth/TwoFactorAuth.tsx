@@ -48,7 +48,7 @@ const TwoFactorAuth = ({ email }: Props) => {
           to="/"
           className="inline-flex items-center justify-center gap-2 textcolor text-2xl font-extrabold tracking-tight mb-6"
         >
-          Affill
+          Rebtools
         </Link>
 
         {status === 'idle' && (

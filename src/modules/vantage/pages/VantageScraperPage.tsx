@@ -1,6 +1,6 @@
-import VantageScraperDashboard from "../components/VantageScraperDashboard";
+import Dashboard from "../components/Dashboard";
 
 export default function VantageScraperPage() {
-  return <VantageScraperDashboard />;
+  return <Dashboard />;
 }
 

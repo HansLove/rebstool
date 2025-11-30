@@ -1,88 +1,88 @@
 import { motion } from "motion/react";
 import { 
+  Database, 
   TrendingUp, 
-  Shield, 
-  Users,
+  AlertCircle,
+  BarChart3,
+  Clock,
   Zap,
-  Target,
-  Rocket,
-  Star,
-  Sparkles,
+  Search,
+  Activity,
 } from "lucide-react";
 
 const WhyJoinSection = () => {
   const features = [
     {
-      icon: <TrendingUp className="w-8 h-8" />,
-      title: "Advanced Analytics",
-      description: "Professional marketing analytics and conversion tracking",
-      colorFrom: "#3b82f6",   // blue-500
+      icon: <Database className="w-8 h-8" />,
+      title: "Scraping Automatizado",
+      description: "Captura automática de datos con snapshots programados y almacenamiento seguro",
+      colorFrom: "#0ea5e9",   // sky-500
       colorTo: "#06b6d4",     // cyan-500
-      bgColor: "#eff6ff",     // blue-50
-      bgColorDark: "rgba(59, 130, 246, 0.125)", // blue-900/20 equivalent
+      bgColor: "#f0f9ff",     // sky-50
+      bgColorDark: "rgba(14, 165, 233, 0.125)", // sky-900/20 equivalent
     },
     {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Blockchain Security", 
-      description: "Secure, transparent transactions powered by smart contracts",
-      colorFrom: "#10b981",   // emerald-500
-      colorTo: "#22c55e",     // green-500
-      bgColor: "#d1fae5",     // emerald-50
-      bgColorDark: "rgba(5, 150, 105, 0.125)", // emerald-900/20
+      icon: <TrendingUp className="w-8 h-8" />,
+      title: "Análisis Temporal", 
+      description: "Compara snapshots y detecta cambios en equity, depósitos y usuarios",
+      colorFrom: "#22c55e",   // green-500
+      colorTo: "#16a34a",     // green-600
+      bgColor: "#f0fdf4",     // green-50
+      bgColorDark: "rgba(34, 197, 94, 0.125)", // green-900/20
+    },
+    {
+      icon: <AlertCircle className="w-8 h-8" />,
+      title: "Detección de Cambios",
+      description: "Alertas automáticas cuando se detectan nuevos usuarios o cambios significativos",
+      colorFrom: "#f59e0b",   // amber-500
+      colorTo: "#f97316",     // orange-500
+      bgColor: "#fffbeb",     // amber-50
+      bgColorDark: "rgba(245, 158, 11, 0.125)", // amber-900/20
+    },
+    {
+      icon: <BarChart3 className="w-8 h-8" />,
+      title: "Métricas Financieras",
+      description: "Visualiza equity total, depósitos, volumen de trading y más",
+      colorFrom: "#8b5cf6",   // violet-500
+      colorTo: "#7c3aed",     // violet-600
+      bgColor: "#f5f3ff",     // violet-50
+      bgColorDark: "rgba(139, 92, 246, 0.125)", // violet-900/20
+    },
+    {
+      icon: <Clock className="w-8 h-8" />,
+      title: "Journal de Actividad",
+      description: "Registro histórico diario de actividad, depósitos y cambios",
+      colorFrom: "#6366f1",   // indigo-500
+      colorTo: "#4f46e5",     // indigo-600
+      bgColor: "#eef2ff",     // indigo-50
+      bgColorDark: "rgba(99, 102, 241, 0.125)", // indigo-900/20
+    },
+    {
+      icon: <Search className="w-8 h-8" />,
+      title: "Búsqueda Avanzada", 
+      description: "Encuentra usuarios específicos por nombre, ID o filtros personalizados",
+      colorFrom: "#ec4899",   // pink-500
+      colorTo: "#db2777",     // pink-600
+      bgColor: "#fdf2f8",     // pink-50
+      bgColorDark: "rgba(236, 72, 153, 0.125)", // pink-900/20
     },
     {
       icon: <Zap className="w-8 h-8" />,
-      title: "Marketing Automation",
-      description: "Automated campaigns and lead generation tools",
-      colorFrom: "#eab308",   // yellow-500
-      colorTo: "#f97316",     // orange-500
-      bgColor: "#fef3c7",     // yellow-50
-      bgColorDark: "rgba(202, 138, 4, 0.125)", // yellow-900/20
-    },
-    {
-      icon: <Rocket className="w-8 h-8" />,
-      title: "Scale Your Network",
-      description: "Build and manage virtual affiliate networks efficiently",
-      colorFrom: "#8b5cf6",   // purple-500
-      colorTo: "#ec4899",     // pink-500
-      bgColor: "#ede9fe",     // purple-50
-      bgColorDark: "rgba(109, 40, 217, 0.125)", // purple-900/20
-    },
-    {
-      icon: <Sparkles className="w-8 h-8" />,
-      title: "Premium Tools",
-      description: "Access to exclusive fintech marketing strategies",
-      colorFrom: "#6366f1",   // indigo-500
-      colorTo: "#8b5cf6",     // purple-500
-      bgColor: "#e0e7ff",     // indigo-50
-      bgColorDark: "rgba(67, 56, 202, 0.125)", // indigo-900/20
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: "Expert Communities", 
-      description: "Connect with fintech professionals and digital marketers",
-      colorFrom: "#f43f5e",   // rose-500
-      colorTo: "#ec4899",     // pink-500
-      bgColor: "#fef2f2",     // rose-50
-      bgColorDark: "rgba(190, 18, 60, 0.125)", // rose-900/20
-    },
-    {
-      icon: <Target className="w-8 h-8" />,
-      title: "Smart Targeting",
-      description: "AI-powered audience targeting and optimization",
+      title: "Tiempo Real",
+      description: "Actualizaciones instantáneas y notificaciones de cambios importantes",
       colorFrom: "#14b8a6",   // teal-500
-      colorTo: "#06b6d4",     // cyan-500
-      bgColor: "#ccfbf1",     // teal-50
-      bgColorDark: "rgba(13, 148, 136, 0.125)", // teal-900/20
+      colorTo: "#0d9488",     // teal-600
+      bgColor: "#f0fdfa",     // teal-50
+      bgColorDark: "rgba(20, 184, 166, 0.125)", // teal-900/20
     },
     {
-      icon: <Star className="w-8 h-8" />,
-      title: "Proven Strategies",
-      description: "Access to battle-tested digital marketing frameworks",
-      colorFrom: "#f59e0b",   // amber-500
-      colorTo: "#eab308",     // yellow-500
-      bgColor: "#fef3c7",     // amber-50
-      bgColorDark: "rgba(202, 138, 4, 0.125)", // amber-900/20
+      icon: <Activity className="w-8 h-8" />,
+      title: "Cálculos de Segundo Nivel",
+      description: "Análisis profundo de rebates con métricas avanzadas y comparaciones",
+      colorFrom: "#06b6d4",   // cyan-500
+      colorTo: "#0891b2",     // cyan-600
+      bgColor: "#ecfeff",     // cyan-50
+      bgColorDark: "rgba(6, 182, 212, 0.125)", // cyan-900/20
     }
   ];
 
@@ -112,36 +112,31 @@ const WhyJoinSection = () => {
 
   return (
     <div
-      className="relative min-h-screen py-24 overflow-hidden"
-      style={{
-        background: `linear-gradient(to bottom right, #f8fafc, #ffffff, #dbeafe)`, // from-slate-50 via-white to-blue-50 hex approx
-        color: "#0f172a" // dark slate color for text
-      }}
+      className="relative min-h-screen py-24 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-30">
         <div
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(to right, rgba(191,219,254,0.3), rgba(219,214,254,0.3))`
+            background: `linear-gradient(to right, rgba(14,165,233,0.1), rgba(34,197,94,0.1))`
           }}
         ></div>
         <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(circle at 50% 50%, rgba(59,130,246,0.1), transparent 50%)`
+            background: `radial-gradient(circle at 50% 50%, rgba(14,165,233,0.1), transparent 50%)`
           }}
         ></div>
       </div>
 
       {/* Floating Elements */}
-    
       <div
         className="absolute bottom-20 right-10 rounded-full blur-3xl animate-pulse"
         style={{
           width: "24rem",
           height: "24rem",
-          background: `linear-gradient(to right, rgba(236,72,153,0.125), rgba(253,224,71,0.125))`,
+          background: `linear-gradient(to right, rgba(14,165,233,0.125), rgba(34,197,94,0.125))`,
           animationDelay: "1s"
         }}
       />
@@ -158,45 +153,39 @@ const WhyJoinSection = () => {
           <div
             className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 shadow-lg"
             style={{
-              background: "linear-gradient(to right, #3b82f6, #8b5cf6)"
+              background: "linear-gradient(to right, #0ea5e9, #22c55e)"
             }}
           >
-            <Sparkles className="w-8 h-8 text-white" />
+            <Activity className="w-8 h-8 text-white" />
           </div>
 
-          <h2 style={{ fontSize: "3.75rem", marginBottom: "1.5rem", color: "#0f172a" }}>
-            Why Join AFFIL?
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+            ¿Por qué usar RebTools?
           </h2>
 
           <p
-            className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed"
-            style={{ color: "#475569" }} // slate-600
+            className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed text-gray-600 dark:text-gray-300"
           >
-            Access professional marketing tools and strategies through our blockchain-powered platform. Each tier unlocks{" "}
-            <span style={{ fontWeight: "600", color: "#2563eb" }}>
-              advanced analytics
+            Herramienta profesional para{" "}
+            <span className="font-semibold text-sky-600 dark:text-sky-400">
+              scraping automatizado
             </span>
-            , automation tools, and exclusive fintech communities.{" "}
-            <span style={{ fontWeight: "600", color: "#7c3aed" }}>
-              Build networks. Scale profits.
+            {" "}y{" "}
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              análisis de rebates
             </span>
+            . Monitorea cambios, detecta tendencias y optimiza tus estrategias con datos en tiempo real.
           </p>
 
           <div className="flex justify-center mt-8">
             <div
-              className="flex items-center space-x-2 rounded-full px-6 py-3 shadow-lg border"
-              style={{
-                backgroundColor: "#ffffff",
-                borderColor: "#e2e8f0",
-                color: "#334155"
-              }}
+              className="flex items-center space-x-2 rounded-full px-6 py-3 shadow-lg border bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700"
             >
               <TrendingUp
-                className="w-5 h-5"
-                style={{ color: "#22c55e" }} // green-500
+                className="w-5 h-5 text-emerald-500"
               />
-              <span style={{ fontWeight: 500 }}>
-                10,000+ Digital Marketers
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                Análisis en Tiempo Real
               </span>
             </div>
           </div>
@@ -216,8 +205,8 @@ const WhyJoinSection = () => {
                 className="relative overflow-hidden rounded-3xl border backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl"
                 style={{
                   backgroundColor: feature.bgColor,
-                  borderColor: "rgba(148,163,184,0.3)", // slate-200/50
-                  boxShadow: "0 10px 15px -3px rgba(59,130,246,0.1)",
+                  borderColor: "rgba(148,163,184,0.3)",
+                  boxShadow: "0 10px 15px -3px rgba(14,165,233,0.1)",
                 }}
               >
                 {/* Gradient overlay on hover */}
@@ -254,17 +243,17 @@ const WhyJoinSection = () => {
                   {/* Text Content */}
                   <div className="space-y-3">
                     <h5
-                      className="text-xl font-bold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r"
+                      className="text-xl font-bold"
                       style={{
                         backgroundImage: `linear-gradient(to right, ${feature.colorFrom}, ${feature.colorTo})`,
-                        color: feature.colorFrom,
                         WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent"
+                        WebkitTextFillColor: "transparent",
+                        color: feature.colorFrom,
                       }}
                     >
                       {feature.title}
                     </h5>
-                    <p className="text-sm text-slate-600">{feature.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
                   </div>
                 </div>
               </div>

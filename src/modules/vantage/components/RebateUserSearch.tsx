@@ -410,7 +410,7 @@ export default function RebateUserSearch({ currentSnapshot }: RebateUserSearchPr
   return (
     <div className="relative">
       {/* Search Bar */}
-      <div className="bg-gradient-to-r from-blue-700 to-slate-700 rounded-2xl p-6 text-white">
+      <div className=" bg-linear-to-r from-blue-700 to-slate-700 rounded-2xl p-6 text-white">
         <h1 className="text-3xl font-bold mb-4">Search Rebate User</h1>
         <p className="text-blue-100 mb-4">
           Verify if a user belongs to your rebate community

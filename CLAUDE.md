@@ -1,4 +1,4 @@
-# Affill Frontend
+# Rebtools Frontend
 
 See @README.md for project overview and user documentation.
 

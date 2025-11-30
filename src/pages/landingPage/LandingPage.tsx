@@ -30,15 +30,15 @@ export default function LandingPage() {
       link: "#about",
     },
     {
-      name: "Community",
-      link: "#community",
+      name: "Features",
+      link: "#features",
     },
     {
       name: "How It Works",
       link: "#how-it-works",
     },
     {
-      name: "Join",
+      name: "Get Started",
       link: "#join",
     },
   ];
@@ -104,16 +104,6 @@ export default function LandingPage() {
               >
                 Login
               </NavbarButton>
-
-              <NavbarButton
-                as={Link}
-                to="/invite"
-                variant="primary"
-                className="w-full"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Get Started
-              </NavbarButton>
             </div>
           </MobileNavMenu>
         </MobileNav>
@@ -130,27 +120,27 @@ export default function LandingPage() {
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="text-center md:text-left"
             >
-              <div className="inline-flex items-center px-3 py-1 mb-5 text-xs font-medium text-purple-700 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
-                AFILL
+              <div className="inline-flex items-center px-3 py-1 mb-5 text-xs font-medium text-sky-700 bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300 rounded-full">
+                REBTOOLS
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-                Access fintech tools. Build virtual networks.
+                Dashboard de Scraping y Cálculos de Rebates
               </h1>
               <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto md:mx-0">
-                Leverage blockchain technology to access premium marketing tools, proven strategies, and exclusive communities in digital markets.
+                Monitorea, analiza y calcula rebates en tiempo real. Herramienta profesional para seguimiento de cambios temporales y análisis de segundo nivel.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link
-                  to="/invite"
-                  className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-base font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-full transition-colors"
+                  to="/login"
+                  className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-base font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-full transition-colors"
                 >
-                  Get started
+                  Acceder al Dashboard
                 </Link>
                 <Link
                   to="#how-it-works"
-                  className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-base font-medium text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                  className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-base font-medium text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700 rounded-full hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors"
                 >
-                  How it works
+                  Cómo funciona
                 </Link>
               </div>
             </motion.div>
@@ -164,7 +154,7 @@ export default function LandingPage() {
             >
               <img
                 src="/assets/images/dash1.webp"
-                alt="AFILL dashboard preview"
+                alt="RebTools dashboard preview"
                 className="w-full h-auto rounded-xl shadow-xl"
                 loading="eager"
                 fetchPriority="high"
@@ -189,49 +179,50 @@ export default function LandingPage() {
               className="space-y-8"
             >
               <div>
-                <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full mb-4">
-                  About Us
+                <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-sky-600 bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300 rounded-full mb-4">
+                  Acerca de
                 </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                  What is AFFIL?
+                  ¿Qué es RebTools?
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                  AFFIL is a blockchain-powered platform that provides access to cutting-edge marketing tools, 
-                  proven strategies, and exclusive fintech communities to help you build profitable virtual affiliate networks.
+                  RebTools es una plataforma especializada en scraping y análisis de rebates. 
+                  Captura snapshots automáticos, detecta cambios en tiempo real y proporciona cálculos 
+                  precisos de segundo nivel para optimizar tus estrategias de rebates.
                 </p>
               </div>
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <div className="shrink-0 w-12 h-12 bg-sky-100 dark:bg-sky-900/50 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Advanced Marketing Tools
+                      Scraping Automatizado
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Access professional-grade marketing automation, analytics dashboards, and conversion optimization tools 
-                      powered by blockchain technology to maximize your affiliate network performance.
+                      Captura automática de datos de rebates con snapshots programados. 
+                      Monitorea cambios en equity, depósitos y actividad de usuarios en tiempo real.
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Exclusive Fintech Communities
+                      Análisis de Segundo Nivel
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Join exclusive communities of digital marketers, fintech professionals, and successful affiliates 
-                      sharing strategies, insights, and opportunities in the virtual economy.
+                      Cálculos avanzados y comparaciones temporales para identificar tendencias, 
+                      detectar nuevos usuarios y analizar cambios en portfolios de rebates.
                     </p>
                   </div>
                 </div>
@@ -247,23 +238,31 @@ export default function LandingPage() {
             >
               <img
                 src="/assets/images/dash2.webp"
-                alt="AFILL Platform Features"
+                alt="RebTools Platform Features"
                 className="w-full h-auto rounded-2xl shadow-2xl"
               />
-              <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-3xl blur-3xl -z-10"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 rounded-3xl blur-3xl -z-10"></div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Other Sections */}
-      <WhyJoinSection />
+      {/* Features Section */}
+      <section id="features">
+        <WhyJoinSection />
+      </section>
+
+      {/* Community Section */}
       <section id="community">
         <CommunitySection />
       </section>
+
+      {/* How It Works */}
       <section id="how-it-works">
         <HowItWorks />
       </section>
+
+      {/* CTA Section */}
       <section id="join">
         <CallToAction />
       </section>

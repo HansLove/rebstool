@@ -90,7 +90,7 @@ function Login() {
       <div className="relative w-full max-w-md">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-light text-slate-800 mb-2 tracking-wide">
-            Affill
+            Rebtools
           </h1>
           <p className="text-slate-500 text-sm font-medium tracking-wider uppercase">
             Network solutions

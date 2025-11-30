@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { fetchVantageData } from "../services/vantageScraperService";
 import {
-  saveSnapshot,
-  getLatestSnapshot,
-  getPreviousSnapshot,
-  getSnapshots,
-} from "../utils/vantageStorage";
+  fetchVantageData,
+  fetchSnapshots,
+} from "../services/vantageScraperService";
 import { compareSnapshots } from "../utils/vantageComparison";
 import type {
   VantageSnapshot,
   ComparisonResult,
   VantageCredentials,
 } from "../types";
-import { mockPreviousSnapshot, mockCurrentSnapshot } from "../data/mockSnapshots";
 
 interface UseVantageScraperReturn {
   // Data
@@ -37,55 +33,55 @@ interface UseVantageScraperReturn {
 }
 
 const STORAGE_LAST_EXECUTION_KEY = "vantage_last_execution";
-// const AUTO_RUN_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const SNAPSHOTS_QUERY_KEY = ["vantage-snapshots"];
 
 export function useVantageScraper(): UseVantageScraperReturn {
+  const queryClient = useQueryClient();
   const [currentSnapshot, setCurrentSnapshot] = useState<VantageSnapshot | null>(null);
   const [previousSnapshot, setPreviousSnapshot] = useState<VantageSnapshot | null>(null);
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  // Load snapshots from storage on mount, or use mock data if none exist
+  // Fetch snapshots list from API
+  const {
+    data: snapshotsData,
+    isLoading: isLoadingSnapshots,
+    error: snapshotsError,
+  } = useQuery({
+    queryKey: SNAPSHOTS_QUERY_KEY,
+    queryFn: () => fetchSnapshots(1, 2), // Fetch first page with 10 items
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: false,
+  });
+
+  // Load latest and previous snapshots from API data
   useEffect(() => {
-    const latest = getLatestSnapshot();
-    const previous = getPreviousSnapshot();
-    
-    // If no snapshots in storage, use mock data
-    if (!latest) {
-      // Save both mock snapshots directly to localStorage (bypassing saveSnapshot to avoid trimming)
-      const mockSnapshots = [mockCurrentSnapshot, mockPreviousSnapshot];
-      localStorage.setItem("vantage_snapshots", JSON.stringify(mockSnapshots));
-      
-      setCurrentSnapshot(mockCurrentSnapshot);
-      setPreviousSnapshot(mockPreviousSnapshot);
-      
-      // Compare mock snapshots
-      const comparison = compareSnapshots(mockPreviousSnapshot, mockCurrentSnapshot);
-      setComparisonResult(comparison);
-    } else {
+    if (snapshotsData?.snapshots && snapshotsData.snapshots.length > 0) {
+      const latest = snapshotsData.snapshots[0]; // First item is latest (sorted by timestamp desc)
+      const previous = snapshotsData.snapshots[1] || null; // Second item is previous
+
       setCurrentSnapshot(latest);
-      
-      // If we have both snapshots, compare them
+
       if (previous) {
         setPreviousSnapshot(previous);
         const comparison = compareSnapshots(previous, latest);
         setComparisonResult(comparison);
+      } else {
+        setPreviousSnapshot(null);
+        setComparisonResult(null);
       }
+    } else if (snapshotsError) {
+      setError(snapshotsError as Error);
     }
-  }, []);
+  }, [snapshotsData, snapshotsError]);
 
   // Mutation for running the scraper
   const mutation = useMutation({
     mutationFn: (credentials?: VantageCredentials) => fetchVantageData(credentials),
     onSuccess: (newSnapshot) => {
-      // IMPORTANT: Get the CURRENT snapshot BEFORE saving the new one
-      // This becomes the PREVIOUS snapshot after we save the new one
-      const currentBeforeSave = getLatestSnapshot();
+      // Get the current snapshot before updating (becomes previous)
+      const currentBeforeSave = currentSnapshot;
 
-      // Save new snapshot (this will automatically keep only the 2 most recent)
-      // After this, the array will be: [newSnapshot, currentBeforeSave]
-      saveSnapshot(newSnapshot);
-      
       // Update state: new snapshot becomes current, old current becomes previous
       setCurrentSnapshot(newSnapshot);
       setPreviousSnapshot(currentBeforeSave || null);
@@ -117,8 +113,13 @@ export function useVantageScraper(): UseVantageScraperReturn {
       } else {
         // First snapshot, no comparison
         setComparisonResult(null);
-        toast.success("First snapshot saved successfully. Run again to start comparing.", { duration: 4000 });
+        toast.success("First snapshot saved successfully. Run again to start comparing.", {
+          duration: 4000,
+        });
       }
+
+      // Invalidate and refetch snapshots list to get updated data from API
+      queryClient.invalidateQueries({ queryKey: SNAPSHOTS_QUERY_KEY });
 
       // Save execution time
       localStorage.setItem(STORAGE_LAST_EXECUTION_KEY, Date.now().toString());
@@ -141,16 +142,19 @@ export function useVantageScraper(): UseVantageScraperReturn {
   );
 
   const clearSnapshots = useCallback(() => {
-    localStorage.removeItem("vantage_snapshots");
-    localStorage.removeItem(STORAGE_LAST_EXECUTION_KEY);
+    // Note: This clears local state only. To delete from server, you'd need a DELETE endpoint.
     setCurrentSnapshot(null);
     setPreviousSnapshot(null);
     setComparisonResult(null);
-    toast.success("Snapshots cleared", { duration: 3000 });
-  }, []);
+    localStorage.removeItem(STORAGE_LAST_EXECUTION_KEY);
+    queryClient.invalidateQueries({ queryKey: SNAPSHOTS_QUERY_KEY });
+    toast.success("Snapshots cleared from view", { duration: 3000 });
+  }, [queryClient]);
 
-  // Get snapshots list
-  const snapshots = getSnapshots().sort((a, b) => b.timestamp - a.timestamp);
+  // Get snapshots list from API data
+  const snapshots = useMemo(() => {
+    return snapshotsData?.snapshots || [];
+  }, [snapshotsData]);
 
   // Get last execution time
   const lastExecutionTime = localStorage.getItem(STORAGE_LAST_EXECUTION_KEY)
@@ -163,14 +167,21 @@ export function useVantageScraper(): UseVantageScraperReturn {
       comparisonResult.summary.totalRemoved > 0 ||
       comparisonResult.summary.totalChanged > 0);
 
+  // Combine loading states
+  const isLoading = mutation.isPending || isLoadingSnapshots;
+  const isFetching = mutation.isPending || isLoadingSnapshots;
+
+  // Use API error if available, otherwise use mutation error
+  const displayError = error || (snapshotsError as Error) || null;
+
   return {
     currentSnapshot,
     previousSnapshot,
     comparisonResult,
     snapshots,
-    isLoading: mutation.isPending,
-    isFetching: mutation.isPending,
-    error,
+    isLoading,
+    isFetching,
+    error: displayError,
     runScraper,
     clearSnapshots,
     lastExecutionTime,

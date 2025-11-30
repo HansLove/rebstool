@@ -1,6 +1,6 @@
-# Affill - Affiliate Management Platform
+# Rebtools - Affiliate Management Platform
 
-Affill is a comprehensive web-based affiliate management platform built for tracking, managing, and optimizing affiliate partnerships. The platform provides real-time analytics, commission tracking, payment processing, and network management tools for both affiliate partners and administrators.
+Rebtools is a comprehensive web-based affiliate management platform built for tracking, managing, and optimizing affiliate partnerships. The platform provides real-time analytics, commission tracking, payment processing, and network management tools for both affiliate partners and administrators.
 
 ## Overview
 

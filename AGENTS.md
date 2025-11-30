@@ -1,6 +1,6 @@
-# Affill Frontend - Technical Guidelines for Agents
+# Rebtools Frontend - Technical Guidelines for Agents
 
-Affill is a React-based affiliate management platform with blockchain integration, built using modern TypeScript patterns and component architecture. This document provides complete technical guidelines for Claude Code agents working on this codebase.
+Rebtools is a React-based affiliate management platform with blockchain integration, built using modern TypeScript patterns and component architecture. This document provides complete technical guidelines for Claude Code agents working on this codebase.
 
 For business context and user documentation, see [README.md](./README.md)
 
