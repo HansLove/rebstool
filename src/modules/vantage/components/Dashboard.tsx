@@ -141,8 +141,8 @@ export default function Dashboard() {
 
   // Calculate rebates with status (must be before early return)
   const rebatesWithStatus = useMemo(() => {
-    return getRebatesWithStatus(currentSnapshot, previousSnapshot, comparisonResult);
-  }, [currentSnapshot, previousSnapshot, comparisonResult]);
+    return getRebatesWithStatus(currentSnapshot, previousSnapshot);
+  }, [currentSnapshot, previousSnapshot]);
 
   // Filter snapshots for 24h and 7d calculations
   const snapshots24h = useMemo(() => {

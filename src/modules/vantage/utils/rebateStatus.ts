@@ -1,4 +1,4 @@
-import type { Account, VantageSnapshot, ComparisonResult } from "../types";
+import type { Account, VantageSnapshot } from "../types";
 
 export type RebateStatus = "hot" | "cooling" | "at_risk";
 
@@ -16,9 +16,7 @@ export interface RebateWithStatus extends Account {
  */
 export function calculateRebateStatus(
   account: Account,
-  previousAccount: Account | undefined,
-  comparisonResult: ComparisonResult | null
-): RebateStatus {
+  previousAccount: Account | undefined): RebateStatus {
   if (!previousAccount) {
     // New account - default to hot if commission > 0
     return account.commission > 0 ? "hot" : "cooling";
@@ -62,7 +60,7 @@ export function calculateRebateStatus(
 export function getRebatesWithStatus(
   currentSnapshot: VantageSnapshot | null,
   previousSnapshot: VantageSnapshot | null,
-  comparisonResult: ComparisonResult | null
+  // comparisonResult: ComparisonResult | null
 ): RebateWithStatus[] {
   if (!currentSnapshot) return [];
 
@@ -75,7 +73,7 @@ export function getRebatesWithStatus(
 
   return currentSnapshot.accounts.map((account) => {
     const previousAccount = previousAccountsMap.get(account.userId);
-    const status = calculateRebateStatus(account, previousAccount, comparisonResult);
+    const status = calculateRebateStatus(account, previousAccount);
 
     const commissionChange = previousAccount
       ? account.commission - previousAccount.commission
