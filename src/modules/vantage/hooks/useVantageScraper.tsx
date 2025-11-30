@@ -42,14 +42,14 @@ export function useVantageScraper(): UseVantageScraperReturn {
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch snapshots list from API
+  // Fetch snapshots list from API - get more snapshots for 24h/7d calculations
   const {
     data: snapshotsData,
     isLoading: isLoadingSnapshots,
     error: snapshotsError,
   } = useQuery({
     queryKey: SNAPSHOTS_QUERY_KEY,
-    queryFn: () => fetchSnapshots(1, 2), // Fetch first page with 10 items
+    queryFn: () => fetchSnapshots(1, 50), // Fetch more snapshots for historical data
     staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: false,
   });

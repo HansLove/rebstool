@@ -56,39 +56,43 @@ export default function MetricCard({
 
   return (
     <div
-      className={`${colors.bg} ${colors.border} border rounded-xl overflow-hidden transition-all cursor-pointer ${colors.hover} hover:shadow-lg active:scale-[0.98]`}
+      className={`${colors.bg} ${colors.border} border rounded-xl transition-all duration-300 cursor-pointer ${colors.hover} hover:shadow-xl active:scale-[0.98] relative ${
+        isExpanded ? "shadow-2xl" : ""
+      }`}
       onClick={onClick || onToggle}
     >
       {/* Header */}
-      <div className="p-4 flex items-center justify-between">
+      <div className="p-5 flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1">
-          <div className={colors.text}>{icon}</div>
+          <div className={`${colors.text} p-2 rounded-lg bg-white/50 dark:bg-gray-800/50`}>
+            {icon}
+          </div>
           <div className="flex-1">
             <h3 className="text-base font-semibold text-gray-900 dark:text-white">
               {title}
             </h3>
-            <p className={`text-3xl font-bold mt-1 ${colors.number}`}>{count}</p>
+            <p className={`text-4xl font-bold mt-1 ${colors.number}`}>{count}</p>
           </div>
         </div>
         <button
-          className={`p-1 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors ${colors.text}`}
+          className={`p-2 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all ${colors.text} ${
+            isExpanded ? "rotate-180" : ""
+          }`}
           onClick={(e) => {
             e.stopPropagation();
             onToggle();
           }}
         >
-          {isExpanded ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
+          <ChevronDown className="h-5 w-5 transition-transform" />
         </button>
       </div>
 
-      {/* Expandable Content */}
+      {/* Expandable Content - Fixed Layout */}
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4 max-h-96 overflow-y-auto">
-          {children}
+        <div className="px-5 pb-5 border-t border-gray-200 dark:border-gray-700 pt-4 animate-in slide-in-from-top-2 duration-300">
+          <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+            {children}
+          </div>
         </div>
       )}
     </div>
