@@ -38,7 +38,7 @@ function transformAccount(apiAccount: VantageAccountApi): Account {
 /**
  * Transforms API retail client format to internal RetailClient format
  */
-function transformRetailClient(apiClient: VantageRetailClientApi): RetailClient {
+export function transformRetailClient(apiClient: VantageRetailClientApi): RetailClient {
   return {
     registerDate: apiClient.registerDate,
     firstDepositDate: apiClient.firstDepositDate || null,
@@ -80,13 +80,17 @@ export function transformApiSnapshotToSnapshot(
   );
 
   // Transform retail results - group by account_login
+  // Handle both summary mode (no clients) and full mode (with clients)
   const retailResultsMap = new Map<number, RetailResult>();
 
   (apiSnapshot.VantageRetailHeaders || []).forEach((header) => {
     const login = header.account_login;
-    const retailClients = (header.VantageRetailClients || []).map(
-      transformRetailClient
-    );
+    
+    // Check if clients are included (full mode) or just summary (summary mode)
+    const hasClients = header.VantageRetailClients && header.VantageRetailClients.length > 0;
+    const retailClients = hasClients 
+      ? header.VantageRetailClients.map(transformRetailClient)
+      : []; // Empty array in summary mode
 
     if (!retailResultsMap.has(login)) {
       retailResultsMap.set(login, {

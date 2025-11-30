@@ -6,9 +6,12 @@ import type {
   VantageCredentials,
   SnapshotsListResponse,
   SnapshotByIdResponse,
+  SnapshotClientsResponse,
+  SnapshotAnalyticsResponse,
   PaginationInfo,
+  RetailClient,
 } from "../types";
-import { transformApiSnapshotToSnapshot } from "../utils/vantageTransformer";
+import { transformApiSnapshotToSnapshot, transformRetailClient } from "../utils/vantageTransformer";
 
 /**
  * Fetches Vantage scraper data from the backend API
@@ -87,19 +90,23 @@ export async function fetchVantageData(
 }
 
 /**
- * Fetches all snapshots with pagination support
+ * Fetches all snapshots with pagination support (optimized - summary mode by default)
  * 
  * Endpoint: GET /api/vantage-scraper
  * 
  * @param page Page number (default: 1)
  * @param limit Number of items per page (default: 10)
+ * @param summaryOnly Return summary data only, excludes nested clients (default: true)
  * @returns Promise with snapshots list and pagination info
  * 
  * @throws Error if the API request fails
+ * 
+ * Note: Summary mode returns ~50 lines per snapshot vs 67,000+ lines in full mode (99.9% reduction)
  */
 export async function fetchSnapshots(
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  summaryOnly: boolean = true
 ): Promise<{
   snapshots: VantageSnapshot[];
   pagination: PaginationInfo;
@@ -108,7 +115,11 @@ export async function fetchSnapshots(
     const response = await http.get<SnapshotsListResponse>(
       "vantage-scraper",
       {
-        params: { page, limit },
+        params: { 
+          page, 
+          limit,
+          summary_only: summaryOnly,
+        },
       }
     );
 
@@ -142,21 +153,42 @@ export async function fetchSnapshots(
 }
 
 /**
- * Fetches a specific snapshot by ID
+ * Fetches a specific snapshot by ID (optimized - clients excluded by default)
  * 
  * Endpoint: GET /api/vantage-scraper/:snapshotId
  * 
  * @param snapshotId The snapshot ID (e.g., "snapshot_1234567890")
- * @returns Promise<VantageSnapshot> The snapshot with all related data
+ * @param includeClients Include retail clients in response (default: false)
+ * @param clientLimit Maximum number of clients to return when includeClients=true (default: 100)
+ * @param fields Optional comma-separated list of fields to include (e.g., "email,phone,tagList")
+ * @returns Promise<VantageSnapshot> The snapshot with related data
  * 
  * @throws Error if the snapshot is not found or the API request fails
+ * 
+ * Note: Without clients, response is ~100 lines vs 67,000+ lines with all clients (99.8% reduction)
  */
 export async function fetchSnapshotById(
-  snapshotId: string
+  snapshotId: string,
+  includeClients: boolean = false,
+  clientLimit: number = 100,
+  fields?: string
 ): Promise<VantageSnapshot> {
   try {
+    const params: Record<string, any> = {
+      include_clients: includeClients,
+    };
+    
+    if (includeClients) {
+      params.client_limit = clientLimit;
+    }
+    
+    if (fields) {
+      params.fields = fields;
+    }
+
     const response = await http.get<SnapshotByIdResponse>(
-      `vantage-scraper/${snapshotId}`
+      `vantage-scraper/${snapshotId}`,
+      { params }
     );
 
     if (!response.data.success) {
@@ -180,6 +212,119 @@ export async function fetchSnapshotById(
       );
     } else {
       throw new Error(error.message || "Failed to fetch snapshot");
+    }
+  }
+}
+
+/**
+ * Fetches paginated retail clients for a specific snapshot
+ * 
+ * Endpoint: GET /api/vantage-scraper/:snapshotId/clients
+ * 
+ * @param snapshotId The snapshot ID (e.g., "snapshot_1234567890")
+ * @param page Page number (default: 1)
+ * @param limit Number of clients per page (default: 50)
+ * @param fields Optional comma-separated list of optional fields (e.g., "email,phone,tagList,campaignSource")
+ * @returns Promise with clients array and pagination info
+ * 
+ * @throws Error if the snapshot is not found or the API request fails
+ * 
+ * Note: Response size is ~2,500 lines per page (50 clients) vs 67,000+ lines for all clients
+ */
+export async function fetchSnapshotClients(
+  snapshotId: string,
+  page: number = 1,
+  limit: number = 50,
+  fields?: string
+): Promise<{
+  clients: RetailClient[];
+  pagination: PaginationInfo;
+}> {
+  try {
+    const params: Record<string, any> = {
+      page,
+      limit,
+    };
+    
+    if (fields) {
+      params.fields = fields;
+    }
+
+    const response = await http.get<SnapshotClientsResponse>(
+      `vantage-scraper/${snapshotId}/clients`,
+      { params }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Failed to fetch clients");
+    }
+
+    // Transform API clients to internal format
+    const clients = response.data.data.clients.map(transformRetailClient);
+
+    return {
+      clients,
+      pagination: response.data.data.pagination,
+    };
+  } catch (error: any) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        throw new Error("Snapshot not found");
+      }
+      const errorMessage =
+        error.response.data?.message ||
+        `API Error: ${error.response.status}`;
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      throw new Error(
+        "Network error: Unable to reach the server. Please check your connection and try again."
+      );
+    } else {
+      throw new Error(error.message || "Failed to fetch clients");
+    }
+  }
+}
+
+/**
+ * Fetches aggregated analytics for a specific snapshot
+ * 
+ * Endpoint: GET /api/vantage-scraper/:snapshotId/analytics
+ * 
+ * @param snapshotId The snapshot ID (e.g., "snapshot_1234567890")
+ * @returns Promise with analytics data
+ * 
+ * @throws Error if the snapshot is not found or the API request fails
+ * 
+ * Note: Response size is ~100 lines - lightweight aggregated data perfect for dashboards
+ */
+export async function fetchSnapshotAnalytics(
+  snapshotId: string
+): Promise<SnapshotAnalyticsResponse["data"]> {
+  try {
+    const response = await http.get<SnapshotAnalyticsResponse>(
+      `vantage-scraper/${snapshotId}/analytics`
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Failed to fetch analytics");
+    }
+
+    return response.data.data;
+  } catch (error: any) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        throw new Error("Snapshot not found");
+      }
+      const errorMessage =
+        error.response.data?.message ||
+        `API Error: ${error.response.status}`;
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      throw new Error(
+        "Network error: Unable to reach the server. Please check your connection and try again."
+      );
+    } else {
+      throw new Error(error.message || "Failed to fetch analytics");
     }
   }
 }

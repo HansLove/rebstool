@@ -234,7 +234,7 @@ export default function Dashboard() {
       <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm mb-3 -mx-2 lg:-mx-3 px-2 lg:px-3 py-2">
         <div className="flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Rebates Control Panel</h1>
+            {/* <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Rebates Control Panel</h1> */}
             <div className="flex flex-wrap items-center gap-3 mt-1">
               {lastExecutionTime && (
                 <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -274,6 +274,14 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+
+            {/* Central Search - Full Width */}
+            <div className="mb-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <CentralSearch currentSnapshot={currentSnapshot} onUserClick={handleUserClick} />
+        </div>
+      </div>
 
       {/* Priority Alert Cards - Client Requests */}
       <div className="mb-3">
@@ -373,27 +381,23 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Rebates KPIs Panel - Secondary Information */}
-      <div className="mb-3">
-        <RebatesKPIs
-          currentSnapshot={currentSnapshot}
-          previousSnapshot={previousSnapshot}
-          snapshots24h={snapshots24h}
-          snapshots7d={snapshots7d}
-        />
-      </div>
 
-      {/* Central Search - Full Width */}
-      <div className="mb-3">
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-          <CentralSearch currentSnapshot={currentSnapshot} onUserClick={handleUserClick} />
-        </div>
-      </div>
+
 
       {/* Rebates Table - Bottom Half */}
       <div className="mb-3">
         <RebatesTable rebates={rebatesWithStatus} onRebateClick={handleRebateClick} />
       </div>
+
+      {/* Rebates KPIs Panel - Secondary Information */}
+      <div className="mb-3">
+            <RebatesKPIs
+              currentSnapshot={currentSnapshot}
+              previousSnapshot={previousSnapshot}
+              snapshots24h={snapshots24h}
+              snapshots7d={snapshots7d}
+            />
+          </div>
 
       {/* No Data State */}
       {!currentSnapshot && !isLoading && (

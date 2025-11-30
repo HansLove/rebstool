@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import {
   fetchVantageData,
   fetchSnapshots,
+  fetchSnapshotById,
 } from "../services/vantageScraperService";
 import { compareSnapshots } from "../utils/vantageComparison";
 import type {
@@ -42,34 +43,55 @@ export function useVantageScraper(): UseVantageScraperReturn {
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch snapshots list from API - get more snapshots for 24h/7d calculations
+  // Fetch snapshots list from API - get more snapshots for 24h/7d calculations (summary mode)
   const {
     data: snapshotsData,
     isLoading: isLoadingSnapshots,
     error: snapshotsError,
   } = useQuery({
     queryKey: SNAPSHOTS_QUERY_KEY,
-    queryFn: () => fetchSnapshots(1, 50), // Fetch more snapshots for historical data
+    queryFn: () => fetchSnapshots(1, 50, true), // Fetch summary snapshots (optimized)
     staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: false,
   });
 
   // Load latest and previous snapshots from API data
+  // For comparison, we need full snapshots with clients, so fetch them separately
   useEffect(() => {
     if (snapshotsData?.snapshots && snapshotsData.snapshots.length > 0) {
-      const latest = snapshotsData.snapshots[0]; // First item is latest (sorted by timestamp desc)
-      const previous = snapshotsData.snapshots[1] || null; // Second item is previous
+      const latestSummary = snapshotsData.snapshots[0]; // First item is latest (sorted by timestamp desc)
+      const previousSummary = snapshotsData.snapshots[1] || null; // Second item is previous
 
-      setCurrentSnapshot(latest);
+      // Fetch full snapshots with clients for comparison
+      const loadFullSnapshots = async () => {
+        try {
+          // Fetch latest snapshot with clients (needed for comparison and display)
+          const latestFull = await fetchSnapshotById(latestSummary.id, true, 10000); // Include clients, high limit
+          setCurrentSnapshot(latestFull);
 
-      if (previous) {
-        setPreviousSnapshot(previous);
-        const comparison = compareSnapshots(previous, latest);
-        setComparisonResult(comparison);
-      } else {
-        setPreviousSnapshot(null);
-        setComparisonResult(null);
-      }
+          if (previousSummary) {
+            // Fetch previous snapshot with clients for comparison
+            const previousFull = await fetchSnapshotById(previousSummary.id, true, 10000);
+            setPreviousSnapshot(previousFull);
+            const comparison = compareSnapshots(previousFull, latestFull);
+            setComparisonResult(comparison);
+          } else {
+            setPreviousSnapshot(null);
+            setComparisonResult(null);
+          }
+        } catch (err) {
+          console.error("Error loading full snapshots:", err);
+          // Fallback to summary snapshots if full fetch fails
+          setCurrentSnapshot(latestSummary);
+          if (previousSummary) {
+            setPreviousSnapshot(previousSummary);
+            // Can't compare without full client data, so set comparison to null
+            setComparisonResult(null);
+          }
+        }
+      };
+
+      loadFullSnapshots();
     } else if (snapshotsError) {
       setError(snapshotsError as Error);
     }
