@@ -9,7 +9,10 @@ import UserRow from "./dashboard/UserRow";
 import CentralSearch from "./dashboard/CentralSearch";
 import JournalPanel from "./dashboard/JournalPanel";
 import UserInfoCard from "./dashboard/UserInfoCard";
+import LiveMetricsPanel from "./dashboard/LiveMetricsPanel";
+import RebatesTable from "./dashboard/RebatesTable";
 import { useUserTabs } from "../context/UserTabsContext";
+import { getRebatesWithStatus, type RebateWithStatus } from "../utils/rebateStatus";
 
 export default function Dashboard() {
   const { getUser } = useAuth();
@@ -135,6 +138,11 @@ export default function Dashboard() {
     }
   }, [currentSnapshot, previousSnapshot]);
 
+  // Calculate rebates with status (must be before early return)
+  const rebatesWithStatus = useMemo(() => {
+    return getRebatesWithStatus(currentSnapshot, previousSnapshot, comparisonResult);
+  }, [currentSnapshot, previousSnapshot, comparisonResult]);
+
   if (!isAdmin) {
     return (
       <div className="w-full max-w-9xl mx-auto py-8 px-4 lg:px-6">
@@ -181,13 +189,28 @@ export default function Dashboard() {
   // Get active tab
   const activeTab = getActiveTab();
 
+  // Handle rebate click - find associated user and open tab
+  const handleRebateClick = (rebate: RebateWithStatus) => {
+    if (!currentSnapshot) return;
+    
+    // Find the retail client associated with this rebate account
+    const allClients = currentSnapshot.retailResults.flatMap(
+      (result) => result.retail?.data || []
+    );
+    const associatedUser = allClients.find((client) => client.userId === rebate.userId);
+    
+    if (associatedUser) {
+      addTab(associatedUser, rebate);
+    }
+  };
+
   return (
     <div className="w-full max-w-[1800px] mx-auto px-2 lg:px-3">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm mb-3 -mx-2 lg:-mx-3 px-2 lg:px-3 py-2">
         <div className="flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Rebates Control Panel</h1>
             <div className="flex flex-wrap items-center gap-3 mt-1">
               {lastExecutionTime && (
                 <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -228,8 +251,17 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Live Metrics Panel */}
+      <div className="mb-3">
+        <LiveMetricsPanel
+          currentSnapshot={currentSnapshot}
+          comparisonResult={comparisonResult}
+          rebates={rebatesWithStatus}
+        />
+      </div>
+
       {/* Main Layout: 3 Value Cards + Central Search + Journal */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-3">
         {/* Left Column: Value Pattern Cards */}
         <div className={`space-y-3 ${activeTab ? "lg:col-span-7" : "lg:col-span-8"}`}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -337,6 +369,11 @@ export default function Dashboard() {
             <JournalPanel />
           )}
         </div>
+      </div>
+
+      {/* Rebates Table - Bottom Half */}
+      <div className="mb-3">
+        <RebatesTable rebates={rebatesWithStatus} onRebateClick={handleRebateClick} />
       </div>
 
       {/* No Data State */}
