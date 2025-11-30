@@ -1,0 +1,31 @@
+{
+  "entry": [
+    "src/main.tsx",
+    "src/app/App.tsx"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx,js,jsx}"
+  ],
+  "ignore": [
+    "**/*.d.ts",
+    "**/*.config.{js,ts}",
+    "**/node_modules/**",
+    "**/dist/**"
+  ],
+  "ignoreDependencies": [
+    "eslint",
+    "prettier",
+    "typescript",
+    "vite",
+    "@vitejs/plugin-react",
+    "tailwindcss",
+    "postcss",
+    "autoprefixer"
+  ],
+  "ignoreBinaries": [
+    "vite",
+    "tsc",
+    "eslint",
+    "prettier"
+  ]
+}

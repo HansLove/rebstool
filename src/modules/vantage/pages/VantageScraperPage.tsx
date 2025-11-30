@@ -1,6 +1,11 @@
 import Dashboard from "../components/Dashboard";
+import { UserTabsProvider } from "../context/UserTabsContext";
 
 export default function VantageScraperPage() {
-  return <Dashboard />;
+  return (
+    <UserTabsProvider>
+      <Dashboard />
+    </UserTabsProvider>
+  );
 }
 

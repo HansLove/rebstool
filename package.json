@@ -9,7 +9,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deadcode": "knip",
-    "deadcode:fix": "knip --fix --allow-remove-files --fix-type files"
+    "deadcode:report": "knip --reporter json > deadcode-report.json",
+    "deadcode:fix": "knip --fix",
+    "deadcode:files": "knip --include files",
+    "deadcode:deps": "knip --include dependencies",
+    "deadcode:exports": "knip --include exports",
+    "deadcode:types": "knip --include types",
+    "deadcode:custom": "node scripts/find-deadcode.js"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",

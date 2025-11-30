@@ -8,6 +8,8 @@ import useAuth from "@/core/hooks/useAuth";
 import SplashPage from "@/components/SplashPage";
 import Loading from "@/components/loaders/loading1/Loading";
 import { RUTE_USER_LOGIN, RUTE_USER_LOGIN_2FA } from "@/app/routes/routes";
+import { RebToolsLogo } from "@/components/RebToolsLogo";
+import { motion } from "motion/react";
 
 function Login() {
   const {
@@ -86,66 +88,96 @@ function Login() {
   if (showWelcome) return <SplashPage />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center px-6 py-12">
-      <div className="relative w-full max-w-md">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-light text-slate-800 mb-2 tracking-wide">
-            Rebtools
-          </h1>
-          <p className="text-slate-500 text-sm font-medium tracking-wider uppercase">
-            Network solutions
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center px-6 py-12 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
 
-        {/* 📦 Main Form Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/20 p-10">
+      <div className="relative w-full max-w-md z-10">
+        {/* Logo and Branding */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10"
+        >
+          <div className="flex justify-center mb-4">
+            <RebToolsLogo width={180} height={54} />
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+            Professional Rebates Analysis Platform
+          </p>
+        </motion.div>
+
+        {/* Main Form Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 p-8 sm:p-10"
+        >
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-light text-slate-800 mb-2">
-              {requires2FA ? "Two-Factor Verification" : "Welcome back"}
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              {requires2FA ? "Two-Factor Verification" : "Welcome Back"}
             </h2>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
               {requires2FA
                 ? "Enter the 6-digit code sent to your email"
-                : "Sign in to your account"}
+                : "Sign in to access your dashboard"}
             </p>
           </div>
 
-          {/* 🔐 Two-Factor Step */}
+          {/* Two-Factor Step */}
           {requires2FA ? (
-            <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-6"
+            >
               {errorMessage && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm text-center font-medium animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm text-center font-medium"
+                >
                   {errorMessage}
-                </div>
+                </motion.div>
               )}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Verification Code
                 </label>
                 <div className="relative group">
-                  <FaKey className="absolute top-4 left-4 text-slate-400 group-focus-within:text-blue-500" />
+                  <FaKey className="absolute top-4 left-4 text-slate-400 dark:text-slate-500 group-focus-within:text-sky-500 transition-colors" />
                   <input
                     type="text"
                     value={code}
-                    onChange={(e) => setCode(e.target.value)}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     onKeyDown={onEnterKeyPress}
-                    placeholder="Enter the 6-digit code"
+                    placeholder="000000"
                     maxLength={6}
-                    className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 text-slate-800 placeholder-slate-400 
-                             bg-white/50 backdrop-blur-sm transition-all duration-300 ease-out
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                             focus:bg-white focus:shadow-lg hover:border-slate-300 text-center tracking-widest font-semibold text-lg"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 
+                             bg-slate-50 dark:bg-slate-700/50 transition-all duration-200
+                             focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 dark:focus:border-sky-400
+                             focus:bg-white dark:focus:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 
+                             text-center tracking-[0.5em] font-bold text-xl"
                   />
                 </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                  Check your email for the verification code
+                </p>
               </div>
 
               <button
                 onClick={verify2FA}
                 disabled={verifying || code.length < 6}
-                className="w-full bg-gradient-to-r from-blue-700 to-slate-700 hover:from-blue-800 hover:to-slate-800 
-                         text-white font-semibold py-4 rounded-2xl transition-all duration-300 ease-out
-                         transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]
-                         disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="w-full bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 
+                         text-white font-semibold py-4 rounded-xl transition-all duration-200
+                         transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md"
               >
                 {verifying ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -156,96 +188,114 @@ function Login() {
                   "Verify Code"
                 )}
               </button>
-            </div>
+            </motion.div>
           ) : (
-            /* 💬 Regular Login Form */
-            <form onSubmit={handleSubmit(onValid)} className="space-y-6">
+            /* Regular Login Form */
+            <motion.form
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+              onSubmit={handleSubmit(onValid)} 
+              className="space-y-5"
+            >
               {errorMessage && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm text-center font-medium animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm text-center font-medium"
+                >
                   {errorMessage}
-                </div>
+                </motion.div>
               )}
 
               {/* Email */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Email Address
                 </label>
                 <div className="relative group">
-                  <FaEnvelope className="absolute top-4 left-4 text-slate-400 group-focus-within:text-blue-500" />
+                  <FaEnvelope className="absolute top-4 left-4 text-slate-400 dark:text-slate-500 group-focus-within:text-sky-500 transition-colors" />
                   <input
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="you@example.com"
                     {...register("emailOrPhone", { required: "Email is required" })}
                     onKeyDown={onEnterKeyPress}
-                    className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 text-slate-800 placeholder-slate-400 
-                             bg-white/50 backdrop-blur-sm transition-all duration-300 ease-out
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                             focus:bg-white focus:shadow-lg hover:border-slate-300"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 
+                             bg-slate-50 dark:bg-slate-700/50 transition-all duration-200
+                             focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 dark:focus:border-sky-400
+                             focus:bg-white dark:focus:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                   />
                 </div>
                 {errors?.emailOrPhone && (
-                  <p className="text-red-500 text-xs mt-2 ml-1 animate-fade-in">
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-red-500 dark:text-red-400 text-xs mt-1 ml-1"
+                  >
                     {errors.emailOrPhone.message}
-                  </p>
+                  </motion.p>
                 )}
               </div>
 
               {/* Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Password
                 </label>
                 <div className="relative group">
-                  <FaLock className="absolute top-4 left-4 text-slate-400 group-focus-within:text-blue-500" />
+                  <FaLock className="absolute top-4 left-4 text-slate-400 dark:text-slate-500 group-focus-within:text-sky-500 transition-colors" />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     {...register("password", { required: "Password is required" })}
                     onKeyDown={onEnterKeyPress}
-                    className="w-full pl-12 pr-12 py-4 rounded-2xl border border-slate-200 text-slate-800 placeholder-slate-400 
-                             bg-white/50 backdrop-blur-sm transition-all duration-300 ease-out
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                             focus:bg-white focus:shadow-lg hover:border-slate-300"
+                    className="w-full pl-12 pr-12 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 
+                             bg-slate-50 dark:bg-slate-700/50 transition-all duration-200
+                             focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 dark:focus:border-sky-400
+                             focus:bg-white dark:focus:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors duration-200 p-1 rounded-lg hover:bg-slate-100"
+                    className="absolute top-4 right-4 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
                   >
-                    {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                   </button>
                 </div>
                 {errors?.password && (
-                  <p className="text-red-500 text-xs mt-2 ml-1 animate-fade-in">
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-red-500 dark:text-red-400 text-xs mt-1 ml-1"
+                  >
                     {errors.password.message}
-                  </p>
+                  </motion.p>
                 )}
               </div>
 
-              {/* Links + Submit */}
-              <div className="flex justify-between items-center text-sm">
+              {/* Links */}
+              <div className="flex justify-between items-center text-sm pt-2">
                 <a
                   href="/forgot-password"
-                  className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                  className="text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-medium hover:underline transition-colors"
                 >
                   Forgot password?
                 </a>
                 <a
                   href="/contact-us"
-                  className="text-slate-600 hover:text-slate-800 font-medium hover:underline"
+                  className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium hover:underline transition-colors"
                 >
-                  Contact us
+                  Need help?
                 </a>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-700 to-slate-700 hover:from-blue-800 hover:to-slate-800 
-                         text-white font-semibold py-4 rounded-2xl transition-all duration-300 ease-out
-                         transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]
-                         disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="w-full bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 
+                         text-white font-semibold py-4 rounded-xl transition-all duration-200
+                         transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md mt-6"
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -256,9 +306,24 @@ function Login() {
                   "Sign In"
                 )}
               </button>
-            </form>
+            </motion.form>
           )}
-        </div>
+        </motion.div>
+
+        {/* Footer text */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-center mt-8"
+        >
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            Don't have an account?{" "}
+            <a href="/register" className="text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-medium hover:underline">
+              Contact administrator
+            </a>
+          </p>
+        </motion.div>
       </div>
     </div>
   );

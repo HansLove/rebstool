@@ -7,9 +7,10 @@ interface UserRowProps {
   metric: string;
   subMetric?: string;
   onContact?: (user: RetailClient) => void;
+  onClick?: (user: RetailClient) => void;
 }
 
-export default function UserRow({ user, metric, subMetric, onContact }: UserRowProps) {
+export default function UserRow({ user, metric, subMetric, onContact, onClick }: UserRowProps) {
   const whatsappUrl = user.phone ? getWhatsAppUrl(user.phone, user.baseCurrency) : null;
 
   const handleContact = (e: React.MouseEvent) => {
@@ -21,8 +22,17 @@ export default function UserRow({ user, metric, subMetric, onContact }: UserRowP
     }
   };
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick(user);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+    <div 
+      onClick={handleClick}
+      className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer group"
+    >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {user.name}

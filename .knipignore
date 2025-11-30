@@ -1,0 +1,31 @@
+# Archivos que knip debe ignorar aunque aparezcan como no utilizados
+# Estos archivos pueden ser usados dinámicamente o ser necesarios para el build
+
+# Componentes de Vantage (se usan pero knip no los detecta correctamente)
+src/modules/vantage/components/VantageScraperDashboard.tsx
+src/modules/vantage/components/AlertActions.tsx
+src/modules/vantage/components/FinancialMetrics.tsx
+src/modules/vantage/components/RebateUserSearch.tsx
+src/modules/vantage/components/RecentActivity.tsx
+src/modules/vantage/components/SnapshotComparison.tsx
+src/modules/vantage/components/SnapshotTimeline.tsx
+
+# Servicios que pueden ser usados dinámicamente
+src/services/api.ts
+src/services/cryptoService.ts
+src/services/depositService.ts
+src/services/walletService.ts
+src/services/withdrawalService.ts
+
+# Componentes UI que pueden ser usados en el futuro o por otros proyectos
+src/components/ui/animated-testimonials.tsx
+src/components/ui/container-scroll-animation.tsx
+src/components/ui/wobble-card.tsx
+
+# Context providers que pueden ser necesarios
+src/context/BlockchainProvider.tsx
+
+# Utilidades que pueden ser usadas dinámicamente
+src/core/utils/countryToFlag.ts
+src/core/utils/getCountryName.tsx
+

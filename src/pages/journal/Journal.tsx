@@ -81,10 +81,10 @@ export default function Journal() {
         <div className="mb-6 sm:mb-8">
           <h1 className="flex items-center text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-700 dark:text-white mb-2">
             <MdCenterFocusStrong className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 dark:text-indigo-400 mr-3" />
-            Journal de Rebates
+            Rebates Journal
           </h1>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">
-            Visualización detallada de actividad, equity y depósitos diarios
+            Detailed view of daily activity, equity and deposits
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export default function Journal() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Equity Total
+                  Total Equity
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
                   ${splitDecimals(monthlyTotals.totalEquity.toFixed(2))}
@@ -108,7 +108,7 @@ export default function Journal() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Depósitos Totales
+                  Total Deposits
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">
                   ${splitDecimals(monthlyTotals.totalDeposits.toFixed(2))}
@@ -122,7 +122,7 @@ export default function Journal() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Nuevos Usuarios
+                  New Users
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-400">
                   {monthlyTotals.newUsers}
@@ -136,7 +136,7 @@ export default function Journal() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Volumen Trading
+                  Trading Volume
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-orange-600 dark:text-orange-400">
                   {splitDecimals(monthlyTotals.totalVolume.toFixed(2))}
@@ -155,7 +155,7 @@ export default function Journal() {
               className="flex items-center px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white transition-colors duration-200"
             >
               <MdChevronLeft className="w-5 h-5 mr-1" />
-              <span className="hidden sm:inline">Anterior</span>
+              <span className="hidden sm:inline">Previous</span>
             </button>
 
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-700 dark:text-white text-center">
@@ -167,7 +167,7 @@ export default function Journal() {
               disabled={isSameMonth(currentMonth, new Date())}
               className="flex items-center px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="hidden sm:inline">Siguiente</span>
+              <span className="hidden sm:inline">Next</span>
               <MdChevronRight className="w-5 h-5 ml-1" />
             </button>
           </div>
@@ -178,7 +178,7 @@ export default function Journal() {
           <div className="bg-white dark:bg-slate-800 rounded-xl p-12 shadow-lg border border-slate-200 dark:border-slate-700 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p className="text-slate-600 dark:text-slate-300">
-              Cargando datos del journal...
+              Loading journal data...
             </p>
           </div>
         )}
@@ -262,7 +262,7 @@ export default function Journal() {
                         )}
                         {dayNewUsers > 0 && (
                           <div className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                            +{dayNewUsers} nuevo{dayNewUsers !== 1 ? "s" : ""}
+                            +{dayNewUsers} new{dayNewUsers !== 1 ? "" : ""}
                           </div>
                         )}
                         {(dayDepositCount > 0 || dayTradeCount > 0) && (
@@ -275,7 +275,7 @@ export default function Journal() {
                       </div>
                     ) : (
                       <div className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-                        {isCurrentMonthDay ? "Sin datos" : ""}
+                        {isCurrentMonthDay ? "No data" : ""}
                       </div>
                     )}
 
@@ -293,29 +293,29 @@ export default function Journal() {
         {/* Legend */}
         <div className="mt-6 bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
           <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-white mb-3">
-            Leyenda
+            Legend
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs sm:text-sm">
             <div className="flex items-center">
               <div className="w-3 h-3 bg-indigo-300 dark:bg-indigo-500 rounded mr-2"></div>
               <span className="text-slate-600 dark:text-slate-300">
-                Día con actividad
+                Day with activity
               </span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-slate-300 dark:bg-slate-600 rounded mr-2"></div>
               <span className="text-slate-600 dark:text-slate-300">
-                Sin actividad
+                No activity
               </span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-              <span className="text-slate-600 dark:text-slate-300">Hoy</span>
+              <span className="text-slate-600 dark:text-slate-300">Today</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
               <span className="text-slate-600 dark:text-slate-300">
-                Indicador de actividad
+                Activity indicator
               </span>
             </div>
           </div>

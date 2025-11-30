@@ -1,10 +1,10 @@
-import { MdCenterFocusStrong } from "react-icons/md";
+import { RebToolsLogo } from "./RebToolsLogo";
 
 export const LogoIcon = () => (
     <a
       href="/"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm text-slate-500 dark:text-white"
     >
-       <MdCenterFocusStrong className="w-4 h-4"/>
+       <RebToolsLogo variant="icon-only" width={16} height={16} />
     </a>
   );

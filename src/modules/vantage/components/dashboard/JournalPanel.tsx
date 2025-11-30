@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, subMonths, addMonths, isToday, isSameMonth } from "date-fns";
 import { MdChevronLeft, MdChevronRight, MdAttachMoney, MdAccountBalance, MdPeople, MdTrendingUp } from "react-icons/md";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useJournalData } from "@/pages/journal/hooks/useJournalData";
 import { splitDecimals } from "@/core/utils/splitDecimals";
 
 export default function JournalPanel() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isExpanded, setIsExpanded] = useState(false);
   const { dailyData, monthlyTotals, isLoading } = useJournalData(currentMonth);
 
   const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 0 });
@@ -42,6 +44,13 @@ export default function JournalPanel() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Journal</h3>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+            title={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -89,8 +98,15 @@ export default function JournalPanel() {
         </div>
       </div>
 
+      {/* Collapsed Summary */}
+      {!isExpanded && (
+        <div className="text-center py-4 text-sm text-gray-600 dark:text-gray-400">
+          <p>Click expand to view calendar</p>
+        </div>
+      )}
+
       {/* Calendar */}
-      {!isLoading && (
+      {!isLoading && isExpanded && (
         <div>
           <div className="grid grid-cols-7 gap-1 mb-2">
             {dayHeaders.map((day) => (

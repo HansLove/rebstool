@@ -5,9 +5,10 @@ import { formatPhoneNumber, getWhatsAppUrl } from "../../utils/phoneFormatter";
 
 interface CentralSearchProps {
   currentSnapshot: VantageSnapshot | null;
+  onUserClick?: (user: RetailClient) => void;
 }
 
-export default function CentralSearch({ currentSnapshot }: CentralSearchProps) {
+export default function CentralSearch({ currentSnapshot, onUserClick }: CentralSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<RetailClient | null>(null);
 
@@ -85,7 +86,12 @@ export default function CentralSearch({ currentSnapshot }: CentralSearchProps) {
               className={`p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all cursor-pointer ${
                 selectedUser?.userId === user.userId ? "ring-2 ring-blue-500" : ""
               }`}
-              onClick={() => setSelectedUser(user)}
+              onClick={() => {
+                setSelectedUser(user);
+                if (onUserClick) {
+                  onUserClick(user);
+                }
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">

@@ -26,7 +26,7 @@ import {
 const detailedSteps = [
   {
     title: "1. Sign Up & Connect Wallet",
-    description: "Create your AFILL account in minutes and connect your preferred cryptocurrency wallet. We support all major wallets including MetaMask, WalletConnect, and more.",
+    description: "Create your RebTools account in minutes and connect your preferred cryptocurrency wallet. We support all major wallets including MetaMask, WalletConnect, and more.",
     icon: <Wallet className="w-8 h-8 text-purple-500" />,
     features: ["Quick registration", "Multiple wallet support", "Secure authentication", "KYC verification"]
   },
@@ -124,7 +124,7 @@ export default function HowItWorksDetailed() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <Link to="/" className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              AFILL
+              RebTools
             </Link>
             <Link
               to="/"
@@ -145,7 +145,7 @@ export default function HowItWorksDetailed() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              How <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">AFILL</span> Works
+              How <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">RebTools</span> Works
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
               Discover the simple 6-step process to start earning crypto rewards through our revolutionary affiliate platform.
@@ -236,7 +236,7 @@ export default function HowItWorksDetailed() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose AFILL?
+              Why Choose RebTools?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Our platform combines cutting-edge technology with user-friendly features to maximize your earning potential.
@@ -329,7 +329,7 @@ export default function HowItWorksDetailed() {
               Ready to Start Earning?
             </h2>
             <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of successful affiliates who are already earning crypto rewards with AFILL.
+              Join thousands of successful affiliates who are already earning crypto rewards with RebTools.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

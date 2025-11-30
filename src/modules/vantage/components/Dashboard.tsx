@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
 import { useVantageScraper } from "../hooks/useVantageScraper";
 import useAuth from "@/core/hooks/useAuth";
-import { RefreshCw, AlertCircle, Users, TrendingDown, DollarSign } from "lucide-react";
-import type { VantageCredentials, RetailClient } from "../types";
+import { RefreshCw, AlertCircle, Users, TrendingDown, DollarSign, Clock } from "lucide-react";
+import type { VantageCredentials, RetailClient, Account } from "../types";
 import { format } from "date-fns";
 import MetricCard from "./dashboard/MetricCard";
 import UserRow from "./dashboard/UserRow";
 import CentralSearch from "./dashboard/CentralSearch";
 import JournalPanel from "./dashboard/JournalPanel";
+import UserInfoCard from "./dashboard/UserInfoCard";
+import { useUserTabs } from "../context/UserTabsContext";
 
 export default function Dashboard() {
   const { getUser } = useAuth();
@@ -16,6 +18,7 @@ export default function Dashboard() {
 
   const {
     currentSnapshot,
+    previousSnapshot,
     comparisonResult,
     isLoading,
     error,
@@ -37,6 +40,9 @@ export default function Dashboard() {
     lostMoney: false,
     withdrawals: false,
   });
+
+  // User tabs from context
+  const { addTab, getActiveTab } = useUserTabs();
 
   // Calculate users who lost significant money (>$500 loss)
   const usersWhoLostMoney = useMemo(() => {
@@ -100,6 +106,35 @@ export default function Dashboard() {
   const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  // Calculate time difference between snapshots
+  const timeDifference = useMemo(() => {
+    if (!currentSnapshot || !previousSnapshot) return null;
+    
+    const diffMs = currentSnapshot.timestamp - previousSnapshot.timestamp;
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+      const remainingHours = diffHours % 24;
+      if (remainingHours > 0) {
+        return `${diffDays} day${diffDays > 1 ? "s" : ""} ${remainingHours} hour${remainingHours > 1 ? "s" : ""}`;
+      }
+      return `${diffDays} day${diffDays > 1 ? "s" : ""}`;
+    } else if (diffHours > 0) {
+      const remainingMinutes = diffMinutes % 60;
+      if (remainingMinutes > 0) {
+        return `${diffHours} hour${diffHours > 1 ? "s" : ""} ${remainingMinutes} minute${remainingMinutes > 1 ? "s" : ""}`;
+      }
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
+    } else {
+      return `${diffSeconds} second${diffSeconds > 1 ? "s" : ""}`;
+    }
+  }, [currentSnapshot, previousSnapshot]);
+
   if (!isAdmin) {
     return (
       <div className="w-full max-w-9xl mx-auto py-8 px-4 lg:px-6">
@@ -131,6 +166,21 @@ export default function Dashboard() {
     return format(new Date(timestamp), "PPpp");
   };
 
+  // Find account for a user
+  const findAccountForUser = (userId: number): Account | undefined => {
+    if (!currentSnapshot) return undefined;
+    return currentSnapshot.accounts.find((acc) => acc.userId === userId);
+  };
+
+  // Handle user click - open in tab
+  const handleUserClick = (user: RetailClient) => {
+    const account = findAccountForUser(user.userId);
+    addTab(user, account);
+  };
+
+  // Get active tab
+  const activeTab = getActiveTab();
+
   return (
     <div className="w-full max-w-[1800px] mx-auto px-2 lg:px-3">
       {/* Header */}
@@ -138,11 +188,21 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
           <div className="flex-1">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            {lastExecutionTime && (
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                Last capture: {formatDate(lastExecutionTime)}
-              </p>
-            )}
+            <div className="flex flex-wrap items-center gap-3 mt-1">
+              {lastExecutionTime && (
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Last capture: {formatDate(lastExecutionTime)}
+                </p>
+              )}
+              {timeDifference && (
+                <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>
+                    Time between snapshots: <span className="font-semibold text-gray-900 dark:text-white">{timeDifference}</span>
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
           <button
             onClick={handleRunScraper}
@@ -171,7 +231,7 @@ export default function Dashboard() {
       {/* Main Layout: 3 Value Cards + Central Search + Journal */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         {/* Left Column: Value Pattern Cards */}
-        <div className="lg:col-span-8 space-y-3">
+        <div className={`space-y-3 ${activeTab ? "lg:col-span-7" : "lg:col-span-8"}`}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* 1. Disappeared Users */}
             <MetricCard
@@ -189,6 +249,7 @@ export default function Dashboard() {
                       key={user.userId}
                       user={user}
                       metric={`Equity: ${formatCurrency(user.equity)}`}
+                      onClick={handleUserClick}
                     />
                   ))}
                 </div>
@@ -216,6 +277,7 @@ export default function Dashboard() {
                       user={user}
                       metric={`Loss: ${formatCurrency(user.loss)}`}
                       subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
+                      onClick={handleUserClick}
                     />
                   ))}
                 </div>
@@ -243,6 +305,7 @@ export default function Dashboard() {
                       user={user}
                       metric={`Withdrawn: ${formatCurrency(user.withdrawal)}`}
                       subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
+                      onClick={handleUserClick}
                     />
                   ))}
                 </div>
@@ -256,13 +319,23 @@ export default function Dashboard() {
 
           {/* Central Search - Full Width Below Cards */}
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-            <CentralSearch currentSnapshot={currentSnapshot} />
+            <CentralSearch currentSnapshot={currentSnapshot} onUserClick={handleUserClick} />
           </div>
         </div>
 
-        {/* Right Column: Journal Panel */}
-        <div className="lg:col-span-4">
-          <JournalPanel />
+        {/* Right Column: Journal Panel or User Info */}
+        <div className={`${activeTab ? "lg:col-span-5" : "lg:col-span-4"}`}>
+          {activeTab ? (
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <UserInfoCard
+                user={activeTab.user}
+                account={activeTab.account}
+                onClose={() => {}}
+              />
+            </div>
+          ) : (
+            <JournalPanel />
+          )}
         </div>
       </div>
 
@@ -278,6 +351,7 @@ export default function Dashboard() {
           </p>
         </div>
       )}
+
     </div>
   );
 }

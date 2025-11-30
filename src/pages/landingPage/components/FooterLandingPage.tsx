@@ -1,3 +1,4 @@
+import { RebToolsLogo } from "@/components/RebToolsLogo";
 
 export default function FooterLandingPage() {
   return (
@@ -6,14 +7,13 @@ export default function FooterLandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <div className="font-bold text-xl mb-3">
-                <img
-                //   src="/assets/images/logos/logo-no-background.png"
-                  src="/assets/images/logos/min-logo.png"
-                  alt="Logo"
-                  className="h-24 w-auto mb-2"
+                <RebToolsLogo
+                  width={180}
+                  height={54}
+                  className="mb-2"
                 />
               </div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 The future of affiliate marketing powered by blockchain
                 technology.
               </p>
@@ -142,7 +142,7 @@ export default function FooterLandingPage() {
           </div>
           <div className="mt-8 pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-500 text-sm mb-4 md:mb-0">
-              © 2025 AFFIL. All rights reserved.
+              © 2025 RebTools. All rights reserved.
             </p>
             <div className="flex space-x-4">
               <a

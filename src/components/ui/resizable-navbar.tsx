@@ -9,6 +9,7 @@ import {
 
 import React, { useRef, useState, createContext, useContext } from "react";
 import { IoMdClose, IoMdMenu } from "react-icons/io";
+import { RebToolsLogo } from "@/components/RebToolsLogo";
 
 // Create a context for the visible state
 const NavbarContext = createContext<{
@@ -269,13 +270,13 @@ export const NavbarLogo = () => {
       href="/"
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal"
     >
-      <img src="/icon-1.png" alt="logo" width={30} height={30} />
+      <RebToolsLogo variant="icon-only" width={30} height={30} />
       <span
         className={`font-medium ${
           visible ? "text-black" : "text-black"
         } dark:text-white`}
       >
-        Afill
+        RebTools
       </span>
     </a>
   );

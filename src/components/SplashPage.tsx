@@ -1,6 +1,7 @@
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { RebToolsLogo } from "@/components/RebToolsLogo";
 
 export default function SplashPage() {
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -31,7 +32,7 @@ export default function SplashPage() {
   return (
     <div className="relative flex flex-col items-center justify-center h-screen overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="absolute inset-0 bg-linear-to-br from-purple-900 via-blue-900 to-indigo-900">
         {/* Animated particles */}
         <div className="absolute inset-0">
           {[...Array(50)].map((_, i) => (
@@ -92,19 +93,19 @@ export default function SplashPage() {
             transition={{ duration: 0.5 }}
             className="relative"
           >
-            <motion.img
-              src="/assets/images/logos/min-logo.png"
-              alt="Rebtools Logo"
-              className="w-24 h-24 filter brightness-0 invert"
+            <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            />
+              className="w-24 h-24 mx-auto"
+            >
+              <RebToolsLogo variant="icon-only" width={96} height={96} className="filter brightness-0 invert" />
+            </motion.div>
             <div className="absolute inset-0 rounded-full border-4 border-white/20 border-t-white animate-spin"></div>
           </motion.div>
 
           <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"
+              className="h-full bg-linear-to-r from-purple-400 to-blue-400 rounded-full"
               style={{ width: `${loadingProgress}%` }}
               transition={{ duration: 0.3 }}
             />
@@ -115,7 +116,7 @@ export default function SplashPage() {
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
-            Initializing your crypto journey...
+            Initializing your Rebates journey...
           </motion.p>
         </div>
       )}
@@ -135,10 +136,10 @@ export default function SplashPage() {
               transition={{ delay: 0.2, duration: 0.6, type: "spring", bounce: 0.4 }}
               className="mb-8"
             >
-              <img
-                src="/assets/images/logos/min-logo.png"
-                alt="Rebtools Logo"
-                className="w-32 h-32 mx-auto filter brightness-0 invert drop-shadow-2xl"
+              <RebToolsLogo 
+                width={200} 
+                height={60} 
+                className="mx-auto filter brightness-0 invert drop-shadow-2xl" 
               />
             </motion.div>
 
@@ -150,7 +151,7 @@ export default function SplashPage() {
               className="text-5xl md:text-7xl font-black mb-6 text-white leading-tight"
             >
               Welcome to{" "}
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                 Rebtools
               </span>
             </motion.h1>
@@ -167,21 +168,21 @@ export default function SplashPage() {
               </h2>
               <div className="grid md:grid-cols-3 gap-6 text-white/80">
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-linear-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                     <span className="text-2xl">🚀</span>
                   </div>
                   <p className="font-semibold">Advanced Tools</p>
                   <p className="text-sm text-center">Professional marketing automation & analytics</p>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-linear-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
                     <span className="text-2xl">💎</span>
                   </div>
                   <p className="font-semibold">Exclusive Access</p>
                   <p className="text-sm text-center">Premium fintech communities & strategies</p>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-linear-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
                     <span className="text-2xl">💰</span>
                   </div>
                   <p className="font-semibold">Maximize Earnings</p>
@@ -199,10 +200,10 @@ export default function SplashPage() {
             >
               <Link
                 to="/"
-                className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-full text-lg shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+                className="group relative px-8 py-4 bg-linear-to-r from-purple-600 to-blue-600 text-white font-bold rounded-full text-lg shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
               >
                 <span className="relative z-10">Start Your Journey</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-purple-700 to-blue-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Link>
               
               <Link

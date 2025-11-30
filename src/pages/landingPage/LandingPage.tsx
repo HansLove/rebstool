@@ -16,12 +16,10 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { useState } from 'react';
 import FooterLandingPage from "./components/FooterLandingPage";
-import WhyJoinSection from "./components/WhyJoinSection";
-import CommunitySection from "./components/ComunitySection";
-import HowItWorks from "./components/HowItWorks";
-import CallToAction from "./components/CallToAction";
 import { FaMoon } from "react-icons/fa6";
 import { useTheme } from '@/hooks/useTheme';
+import { RebToolsLogo } from "@/components/RebToolsLogo";
+import { Database, TrendingUp, Calendar, Zap } from "lucide-react";
 
 export default function LandingPage() {
   const navItems = [
@@ -30,16 +28,8 @@ export default function LandingPage() {
       link: "#about",
     },
     {
-      name: "Features",
-      link: "#features",
-    },
-    {
-      name: "How It Works",
-      link: "#how-it-works",
-    },
-    {
       name: "Get Started",
-      link: "#join",
+      link: "#cta",
     },
   ];
 
@@ -51,7 +41,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative w-full bg-white dark:bg-slate-900 min-h-screen">
+    <div className="relative w-full bg-white dark:bg-slate-900 min-h-screen overflow-hidden">
       {/* Navigation */}
       <Navbar>
         <NavBody>
@@ -109,162 +99,486 @@ export default function LandingPage() {
         </MobileNav>
       </Navbar>
 
-      {/* Hero Section */}
-      <section className="relative flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="grid md:grid-cols-2 gap-10 lg:gap-16 items-center">
-            {/* Content */}
+      {/* Hero Section - Asymmetric Layout */}
+      <section className="relative min-h-[90vh] flex items-center pt-20 pb-32">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              x: [0, 100, 0],
+              y: [0, 50, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute top-20 right-10 w-96 h-96 bg-sky-400/10 dark:bg-sky-500/5 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              x: [0, -80, 0],
+              y: [0, -40, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+            className="absolute bottom-20 left-10 w-80 h-80 bg-emerald-400/10 dark:bg-emerald-500/5 rounded-full blur-3xl"
+          />
+        </div>
+
+        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Content - Takes 7 columns */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="text-center md:text-left"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="lg:col-span-7 space-y-8"
             >
-              <div className="inline-flex items-center px-3 py-1 mb-5 text-xs font-medium text-sky-700 bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300 rounded-full">
-                REBTOOLS
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-                Dashboard de Scraping y Cálculos de Rebates
-              </h1>
-              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto md:mx-0">
-                Monitorea, analiza y calcula rebates en tiempo real. Herramienta profesional para seguimiento de cambios temporales y análisis de segundo nivel.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              {/* Logo Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="inline-block"
+              >
+                <RebToolsLogo width={200} height={60} />
+              </motion.div>
+
+              {/* Main Headline */}
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.1]"
+              >
+                Professional{" "}
+                <span className="bg-gradient-to-r from-sky-600 to-emerald-600 dark:from-sky-400 dark:to-emerald-400 bg-clip-text text-transparent">
+                  Rebates Analysis
+                </span>{" "}
+                Platform
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl"
+              >
+                Automate scraping, track changes, and optimize rebates strategies with real-time analytics and second-level calculations.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="flex flex-col sm:flex-row gap-4 pt-4"
+              >
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-base font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-full transition-colors"
+                  className="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  Acceder al Dashboard
+                  Access Dashboard
+                  <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </Link>
                 <Link
-                  to="#how-it-works"
-                  className="inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-base font-medium text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700 rounded-full hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors"
+                  to="#about"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-sky-500 dark:hover:border-sky-400 hover:text-sky-600 dark:hover:text-sky-400 transition-all duration-200"
                 >
-                  Cómo funciona
+                  Learn More
                 </Link>
+              </motion.div>
+
+              {/* Quick Stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-700"
+              >
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">24/7</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Monitoring</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Real-time</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Updates</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Advanced</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Analytics</div>
               </div>
+              </motion.div>
             </motion.div>
 
-            {/* Visual */}
+            {/* Right Visual - Takes 5 columns, offset */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-              className="relative"
+              initial={{ opacity: 0, x: 50, rotate: -2 }}
+              animate={{ opacity: 1, x: 0, rotate: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="lg:col-span-5 lg:col-start-8 relative"
             >
-              <img
-                src="/assets/images/dash1.webp"
-                alt="RebTools dashboard preview"
-                className="w-full h-auto rounded-xl shadow-xl"
-                loading="eager"
-                fetchPriority="high"
-              />
+              <div className="relative">
+                {/* Minimalistic Animation */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 p-8 overflow-hidden"
+                >
+                  {/* Animated Background Grid */}
+                  <div className="absolute inset-0 opacity-5 dark:opacity-10">
+                    <div className="absolute inset-0" style={{
+                      backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
+                      backgroundSize: '20px 20px'
+                    }}></div>
+                  </div>
+
+                  {/* Animated Data Points */}
+                  <div className="relative h-64 flex items-center justify-center">
+                    {/* Central Gear Icon */}
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      className="absolute"
+                    >
+                      <RebToolsLogo variant="icon-only" width={80} height={80} />
+                    </motion.div>
+
+                    {/* Orbiting Data Points */}
+                    {[...Array(6)].map((_, i) => {
+                      const angle = (i * 60) * (Math.PI / 180);
+                      const radius = 100;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{
+                            opacity: [0.3, 0.8, 0.3],
+                            scale: [0.8, 1.2, 0.8],
+                            x: Math.cos(angle) * radius,
+                            y: Math.sin(angle) * radius,
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            delay: i * 0.2,
+                            ease: "easeInOut"
+                          }}
+                          className="absolute w-3 h-3 bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full"
+                        />
+                      );
+                    })}
+
+                    {/* Floating Data Lines */}
+                    {[...Array(4)].map((_, i) => (
+                      <motion.div
+                        key={`line-${i}`}
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 0.3 }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 0.5,
+                          ease: "easeInOut"
+                        }}
+                        className="absolute"
+                        style={{
+                          width: '200px',
+                          height: '2px',
+                          background: `linear-gradient(to right, transparent, rgb(14 165 233), transparent)`,
+                          transform: `rotate(${i * 45}deg)`,
+                          transformOrigin: 'center',
+                        }}
+                      />
+                    ))}
+
+                    {/* Pulsing Center Dot */}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="absolute w-4 h-4 bg-emerald-500 rounded-full"
+                    />
+                  </div>
+
+                  {/* Bottom Stats Bar */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-sky-50 to-emerald-50 dark:from-slate-700 dark:to-slate-700 p-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          className="w-2 h-2 bg-emerald-500 rounded-full"
+                        />
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Live Data</span>
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-500 font-mono text-xs">
+                        <motion.span
+                          animate={{ opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        >
+                          Syncing...
+                        </motion.span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Floating Cards */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.8 }}
+                  className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-20"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white">Live Data</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Syncing...</div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Background Glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 rounded-3xl blur-3xl -z-10 transform rotate-3"></div>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
+      {/* About Section - Unique Card Layout */}
       <section
-        className="py-24 lg:py-32 bg-white dark:bg-slate-800"
+        className="relative py-32 bg-gradient-to-b from-white via-slate-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
         id="about"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              viewport={{ once: true, amount: 0.3 }}
-              className="space-y-8"
-            >
-              <div>
-                <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-sky-600 bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300 rounded-full mb-4">
-                  Acerca de
-                </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                  ¿Qué es RebTools?
-                </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                  RebTools es una plataforma especializada en scraping y análisis de rebates. 
-                  Captura snapshots automáticos, detecta cambios en tiempo real y proporciona cálculos 
-                  precisos de segundo nivel para optimizar tus estrategias de rebates.
-                </p>
-              </div>
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5 dark:opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-6">
+              Everything you need to{" "}
+              <span className="bg-gradient-to-r from-sky-600 to-emerald-600 dark:from-sky-400 dark:to-emerald-400 bg-clip-text text-transparent">
+                master rebates
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+              A comprehensive platform designed for professionals who need precision, automation, and deep insights into rebates data.
+            </p>
+          </motion.div>
+
+          {/* Feature Cards - Asymmetric Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {[
+              {
+                icon: Database,
+                title: "Automated Scraping",
+                description: "Scheduled snapshots capture data automatically, ensuring you never miss a change.",
+                color: "sky",
+                delay: 0.1
+              },
+              {
+                icon: TrendingUp,
+                title: "Advanced Analysis",
+                description: "Second-level calculations reveal trends and patterns hidden in your data.",
+                color: "emerald",
+                delay: 0.2
+              },
+              {
+                icon: Calendar,
+                title: "Activity Journal",
+                description: "Complete historical tracking of daily activity, deposits, and user changes.",
+                color: "violet",
+                delay: 0.3
+              },
+              {
+                icon: Zap,
+                title: "Real-Time Updates",
+                description: "Instant notifications and live synchronization keep you informed immediately.",
+                color: "amber",
+                delay: 0.4
+              }
+            ].map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: feature.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className={`relative group bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-${feature.color}-300 dark:hover:border-${feature.color}-600 transition-all duration-300 shadow-lg hover:shadow-2xl`}
+                >
+                  {/* Icon */}
+                  <div className={`mb-6 w-14 h-14 bg-${feature.color}-100 dark:bg-${feature.color}-900/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className={`w-7 h-7 text-${feature.color}-600 dark:text-${feature.color}-400`} />
+                  </div>
+                  
+                  {/* Content */}
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+
+                  {/* Hover Effect */}
+                  <div className={`absolute inset-0 bg-gradient-to-br from-${feature.color}-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}></div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Visual Showcase */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="relative max-w-5xl mx-auto"
+          >
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
               
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="shrink-0 w-12 h-12 bg-sky-100 dark:bg-sky-900/50 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Scraping Automatizado
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Captura automática de datos de rebates con snapshots programados. 
-                      Monitorea cambios en equity, depósitos y actividad de usuarios en tiempo real.
-                    </p>
-                  </div>
+              {/* Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
+            </div>
+            
+            {/* Decorative Elements */}
+            <div className="absolute -top-6 -right-6 w-24 h-24 bg-sky-500/20 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-emerald-500/20 rounded-full blur-2xl"></div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section - Unique Split Design */}
+      <section id="cta" className="relative py-32 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-sky-500 to-emerald-600 dark:from-sky-800 dark:via-sky-700 dark:to-emerald-800">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.4, 0.6, 0.4],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+            className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl"
+          />
+        </div>
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-white"
+            >
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
+                Ready to transform your rebates strategy?
+                </h2>
+              <p className="text-xl text-sky-50 mb-8 leading-relaxed">
+                Join professionals who trust RebTools for accurate, real-time rebates analysis and optimization.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-sky-50">
+                  <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
+                  <span>Automated data collection</span>
+              </div>
+                <div className="flex items-center gap-3 text-sky-50">
+                  <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
+                  <span>Real-time change detection</span>
                 </div>
-                
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Análisis de Segundo Nivel
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Cálculos avanzados y comparaciones temporales para identificar tendencias, 
-                      detectar nuevos usuarios y analizar cambios en portfolios de rebates.
-                    </p>
-                  </div>
+                <div className="flex items-center gap-3 text-sky-50">
+                  <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
+                  <span>Advanced analytics & insights</span>
                 </div>
               </div>
             </motion.div>
             
+            {/* Right CTA Card */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
               className="relative"
             >
-              <img
-                src="/assets/images/dash2.webp"
-                alt="RebTools Platform Features"
-                className="w-full h-auto rounded-2xl shadow-2xl"
-              />
-              <div className="absolute -inset-4 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 rounded-3xl blur-3xl -z-10"></div>
+              <div className="bg-white dark:bg-slate-800 p-10 rounded-3xl shadow-2xl border-4 border-white/20">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  Get Started Today
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  Access your dashboard and start analyzing rebates data in minutes.
+                </p>
+                <Link
+                  to="/login"
+                  className="group inline-flex items-center justify-center w-full px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
+                >
+                  Access Dashboard
+                  <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-6">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-sky-600 dark:text-sky-400 hover:underline font-medium">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
             </motion.div>
           </div>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features">
-        <WhyJoinSection />
-      </section>
-
-      {/* Community Section */}
-      <section id="community">
-        <CommunitySection />
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works">
-        <HowItWorks />
-      </section>
-
-      {/* CTA Section */}
-      <section id="join">
-        <CallToAction />
       </section>
       
       {/* Footer */}
