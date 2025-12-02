@@ -3,7 +3,6 @@ import { useVantageScraper } from "../hooks/useVantageScraper";
 import useAuth from "@/core/hooks/useAuth";
 import { RefreshCw, AlertCircle, Users, TrendingDown, DollarSign, Clock } from "lucide-react";
 import type { VantageCredentials, RetailClient, Account } from "../types";
-import { format } from "date-fns";
 import MetricCard from "./dashboard/MetricCard";
 import UserRow from "./dashboard/UserRow";
 import CentralSearch from "./dashboard/CentralSearch";
@@ -31,7 +30,6 @@ export default function Dashboard() {
     isLoading,
     error,
     runScraper,
-    lastExecutionTime,
     snapshots,
   } = useVantageScraper();
 
@@ -208,9 +206,16 @@ export default function Dashboard() {
     await runScraper(creds);
   };
 
-  const formatDate = (timestamp: number | null) => {
+  // Format date in London timezone
+  const formatDateLondon = (timestamp: number | null) => {
     if (!timestamp) return "N/A";
-    return format(new Date(timestamp), "PPpp");
+    const date = new Date(timestamp);
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
+      dateStyle: "medium",
+      timeStyle: "short",
+      hour12: false,
+    }).format(date);
   };
 
   // Find account for a user
@@ -273,9 +278,9 @@ export default function Dashboard() {
           <div className="flex-1">
             {/* <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Rebates Control Panel</h1> */}
             <div className="flex flex-wrap items-center gap-3 mt-1">
-              {lastExecutionTime && (
+              {currentSnapshot?.timestamp && (
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Last capture: {formatDate(lastExecutionTime)}
+                  Last capture: <span className="font-semibold text-gray-900 dark:text-white">{formatDateLondon(currentSnapshot.timestamp)}</span> (London)
                 </p>
               )}
               {timeDifference && (
