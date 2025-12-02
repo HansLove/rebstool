@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, FormEvent } from "react";
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaKey } from "react-icons/fa6";
-import { ILoginForm } from "./types/type";
 import { http } from "@/core/utils/http_request";
 import useAuth from "@/core/hooks/useAuth";
 import SplashPage from "@/components/SplashPage";
@@ -12,26 +10,50 @@ import { RebToolsLogo } from "@/components/RebToolsLogo";
 import { motion } from "motion/react";
 
 function Login() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<ILoginForm>();
-
   const { setToken } = useAuth();
+  
+  // Form state
+  const [emailOrPhone, setEmailOrPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  
+  // UI state
   const [showWelcome, setShowWelcome] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 2FA state
   const [requires2FA, setRequires2FA] = useState(false);
   const [email, setEmail] = useState(""); // Guardamos el email del primer paso
   const [code, setCode] = useState(""); // Código 2FA ingresado por el usuario
   const [verifying, setVerifying] = useState(false);
 
-  const onValid = async (data: ILoginForm) => {
+  // Validation
+  const validateForm = (): boolean => {
+    if (!emailOrPhone.trim()) {
+      setErrorMessage("Email is required");
+      return false;
+    }
+    if (!password.trim()) {
+      setErrorMessage("Password is required");
+      return false;
+    }
+    setErrorMessage("");
+    return true;
+  };
+
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
     try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+      
       const response = await http.post(RUTE_USER_LOGIN, {
-        email: data.emailOrPhone,
-        password: data.password,
+        email: emailOrPhone,
+        password: password,
       });
 
       if (response.status !== 200) throw new Error("Login failed");
@@ -40,7 +62,7 @@ function Login() {
       // Si requiere 2FA, no guardamos el token aún
       if (response.data.requires2FA) {
         setRequires2FA(true);
-        setEmail(data.emailOrPhone);
+        setEmail(emailOrPhone);
         return;
       }
 
@@ -52,6 +74,8 @@ function Login() {
       const msg = error?.response?.data?.message || "Login failed";
       console.error("❌ Login error:", msg);
       setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -80,15 +104,21 @@ function Login() {
 
   const onEnterKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      if (requires2FA) verify2FA();
-      else handleSubmit(onValid)();
+      if (requires2FA) {
+        verify2FA();
+      } else {
+        const form = event.currentTarget.closest("form");
+        if (form) {
+          form.requestSubmit();
+        }
+      }
     }
   };
 
   if (showWelcome) return <SplashPage />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-sky-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center px-6 py-12 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl animate-pulse"></div>
@@ -195,7 +225,7 @@ function Login() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
-              onSubmit={handleSubmit(onValid)} 
+              onSubmit={handleLogin}
               className="space-y-5"
             >
               {errorMessage && (
@@ -218,7 +248,11 @@ function Login() {
                   <input
                     type="email"
                     placeholder="you@example.com"
-                    {...register("emailOrPhone", { required: "Email is required" })}
+                    value={emailOrPhone}
+                    onChange={(e) => {
+                      setEmailOrPhone(e.target.value);
+                      setErrorMessage(""); // Clear error on change
+                    }}
                     onKeyDown={onEnterKeyPress}
                     className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 
                              bg-slate-50 dark:bg-slate-700/50 transition-all duration-200
@@ -226,15 +260,6 @@ function Login() {
                              focus:bg-white dark:focus:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                   />
                 </div>
-                {errors?.emailOrPhone && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-red-500 dark:text-red-400 text-xs mt-1 ml-1"
-                  >
-                    {errors.emailOrPhone.message}
-                  </motion.p>
-                )}
               </div>
 
               {/* Password */}
@@ -247,7 +272,11 @@ function Login() {
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    {...register("password", { required: "Password is required" })}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setErrorMessage(""); // Clear error on change
+                    }}
                     onKeyDown={onEnterKeyPress}
                     className="w-full pl-12 pr-12 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 
                              bg-slate-50 dark:bg-slate-700/50 transition-all duration-200
@@ -262,15 +291,6 @@ function Login() {
                     {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                   </button>
                 </div>
-                {errors?.password && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-red-500 dark:text-red-400 text-xs mt-1 ml-1"
-                  >
-                    {errors.password.message}
-                  </motion.p>
-                )}
               </div>
 
               {/* Links */}

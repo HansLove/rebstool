@@ -4,7 +4,6 @@ import type {
   TraderKPI,
   RebatesOverviewResponse,
   RebatesRankings,
-  RankingItem,
   TraderStatusFlag,
 } from "../types/rebatesOverview";
 
@@ -39,10 +38,6 @@ export function useRebatesOverview({
     // Create maps for quick lookup
     const currentAccountsMap = new Map(
       currentSnapshot.accounts.map((acc) => [acc.userId, acc])
-    );
-
-    const currentClientsMap = new Map(
-      allCurrentClients.map((client) => [client.userId, client])
     );
 
     // Get previous clients for comparison

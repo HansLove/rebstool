@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Filter, ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import type { TraderKPI, TraderStatusFlag } from "../../types/rebatesOverview";
 
 interface TradersTableProps {
