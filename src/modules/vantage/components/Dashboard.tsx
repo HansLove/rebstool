@@ -13,6 +13,11 @@ import RebatesKPIs from "./dashboard/RebatesKPIs";
 import TopAtRiskUsers from "./dashboard/TopAtRiskUsers";
 import { useUserTabs } from "../context/UserTabsContext";
 import { getRebatesWithStatus, type RebateWithStatus } from "../utils/rebateStatus";
+import { useRebatesOverview } from "../hooks/useRebatesOverview";
+import TradersTable from "./dashboard/TradersTable";
+import RebatesQuickRankings from "./dashboard/RebatesQuickRankings";
+import TraderDrawer from "./dashboard/TraderDrawer";
+import type { TraderKPI } from "../types/rebatesOverview";
 
 export default function Dashboard() {
   const { getUser } = useAuth();
@@ -159,6 +164,24 @@ export default function Dashboard() {
     return snapshots.filter((s) => s.timestamp >= sevenDaysAgo);
   }, [snapshots, currentSnapshot]);
 
+  const snapshots30d = useMemo(() => {
+    if (!currentSnapshot) return [];
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    return snapshots.filter((s) => s.timestamp >= thirtyDaysAgo);
+  }, [snapshots, currentSnapshot]);
+
+  // Get rebates overview data
+  const rebatesOverview = useRebatesOverview({
+    currentSnapshot,
+    previousSnapshot,
+    snapshots7d,
+    snapshots30d,
+  });
+
+  // State for trader drawer
+  const [selectedTrader, setSelectedTrader] = useState<TraderKPI | null>(null);
+
   if (!isAdmin) {
     return (
       <div className="w-full max-w-9xl mx-auto py-8 px-4 lg:px-6">
@@ -217,6 +240,20 @@ export default function Dashboard() {
     
     if (associatedUser) {
       addTab(associatedUser, rebate);
+    }
+  };
+
+  // Handle trader click - open drawer
+  const handleTraderClick = (trader: TraderKPI) => {
+    setSelectedTrader(trader);
+  };
+
+  // Handle trader click from rankings
+  const handleRankingTraderClick = (userId: number) => {
+    if (!rebatesOverview) return;
+    const trader = rebatesOverview.traders.find((t) => t.userId === userId);
+    if (trader) {
+      setSelectedTrader(trader);
     }
   };
 
@@ -381,8 +418,30 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Rebates Overview - New Traders Table and Rankings */}
+      {rebatesOverview && (
+        <div className="mb-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Quick Rankings - Left Side */}
+            <div className="lg:col-span-1">
+              <RebatesQuickRankings
+                rankings={rebatesOverview.rankings}
+                isLoading={isLoading}
+                onTraderClick={handleRankingTraderClick}
+              />
+            </div>
 
-
+            {/* Traders Table - Right Side */}
+            <div className="lg:col-span-2">
+              <TradersTable
+                traders={rebatesOverview.traders}
+                onTraderClick={handleTraderClick}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Rebates Table - Bottom Half */}
       <div className="mb-3">
@@ -421,6 +480,13 @@ export default function Dashboard() {
           onClose={handleCloseModal}
         />
       )}
+
+      {/* Trader Drawer */}
+      <TraderDrawer
+        trader={selectedTrader}
+        isOpen={!!selectedTrader}
+        onClose={() => setSelectedTrader(null)}
+      />
 
     </div>
   );
