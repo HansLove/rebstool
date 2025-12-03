@@ -48,6 +48,7 @@ export interface RetailClient {
 
 export interface RetailResult {
   login: number;
+  ownerName: string | null; // Owners/sub-id name from extendString or ownerName
   retail: {
     code: number;
     msg: string | null;
@@ -62,8 +63,12 @@ export interface VantageApiResponse {
   snapshotId?: string; // Snapshot ID returned from the API
   data: {
     success: boolean;
-    accounts: Account[];
-    retailResults: RetailResult[];
+    accounts?: Account[];
+    retailResults?: RetailResult[]; // Legacy structure
+    sub_ibs?: SubIB[]; // New unified structure - clients are in sub_ibs[].clients when include_clients=true
+    // Note: all_clients does NOT exist in the new API structure
+    // Keeping as optional for backward compatibility only
+    all_clients?: RetailClient[]; // Deprecated - should not be used, kept for legacy compatibility
   };
   error?: string;
 }
@@ -73,10 +78,16 @@ export interface VantageSnapshot {
   timestamp: number; // Unix timestamp
   scrapedAt: string; // ISO date string
   accounts: Account[];
-  retailResults: RetailResult[];
+  retailResults: RetailResult[]; // Legacy structure, kept for backward compatibility
+  subIBs?: SubIB[]; // New unified structure
+  allClients?: RetailClient[]; // All clients if include_clients=true
   metadata: {
     totalAccounts: number;
     totalRetailClients: number;
+    // Group accounts by userId to show all sub-ids
+    accountsByUserId: Map<number, Account[]>;
+    // Group retail clients by ownerName to show all sub-ids
+    clientsByOwner: Map<string, RetailClient[]>;
   };
 }
 
@@ -105,6 +116,20 @@ export interface ComparisonResult {
 export interface VantageCredentials {
   username?: string;
   password?: string;
+}
+
+// New Sub-IB structure (unified structure)
+export interface SubIB {
+  ownerName: string;
+  clientCount: number;
+  totalBalance: number;
+  totalEquity: number;
+  totalDeposits: number;
+  depositCount: number;
+  averageBalance: number;
+  averageEquity: number;
+  averageDeposit: number;
+  clients?: RetailClient[]; // Only present if include_clients=true
 }
 
 // API Response Types for GET endpoints
@@ -193,7 +218,8 @@ export interface VantageRetailHeaderApi {
   VantageRetailClients: VantageRetailClientApi[];
 }
 
-export interface VantageSnapshotApi {
+// Legacy API structure (for backward compatibility during migration)
+export interface VantageSnapshotApiLegacy {
   id: string;
   timestamp: number;
   scraped_at: string;
@@ -203,6 +229,24 @@ export interface VantageSnapshotApi {
   updatedAt: string;
   VantageAccounts: VantageAccountApi[];
   VantageRetailHeaders: VantageRetailHeaderApi[];
+}
+
+// New unified API structure
+// According to API documentation: clients are ONLY in sub_ibs[].clients when include_clients=true
+// There is NO separate all_clients array to avoid data duplication
+export interface VantageSnapshotApi {
+  id: string;
+  timestamp: number;
+  scraped_at: string;
+  total_accounts: number;
+  total_retail_clients: number;
+  createdAt: string;
+  updatedAt: string;
+  accounts: VantageAccountApi[];
+  sub_ibs: SubIB[]; // Clients are in sub_ibs[].clients when include_clients=true
+  // Note: all_clients does NOT exist in the new API structure
+  // Keeping as optional for backward compatibility only
+  all_clients?: RetailClient[]; // Deprecated - should not be used, kept for legacy compatibility
 }
 
 export interface PaginationInfo {
@@ -232,6 +276,7 @@ export interface SnapshotClientsResponse {
   data: {
     snapshot_id: string;
     clients: VantageRetailClientApi[];
+    sub_ibs_summary?: SubIB[]; // Summary of Sub-IBs
     pagination: PaginationInfo;
   };
   message?: string;
@@ -275,6 +320,19 @@ export interface SnapshotAnalyticsResponse {
         accountNmber: number;
         profit: number;
       }>;
+      sub_ibs?: {
+        total_clients: number;
+        total_balance: number;
+        total_equity: number;
+        total_deposits: number;
+        average_balance: number;
+        average_equity: number;
+        average_deposit: number;
+        // In analytics endpoint, Sub-IBs use totalClients instead of clientCount
+        sub_ibs: Array<SubIB | (Omit<SubIB, 'clientCount'> & { totalClients: number })>;
+        sub_ibs_by_clients?: Array<SubIB | (Omit<SubIB, 'clientCount'> & { totalClients: number })>;
+        sub_ibs_by_balance?: Array<SubIB | (Omit<SubIB, 'clientCount'> & { totalClients: number })>;
+      };
     };
   };
   message?: string;

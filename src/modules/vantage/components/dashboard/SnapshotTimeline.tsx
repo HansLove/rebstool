@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Calendar, Clock, TrendingUp, TrendingDown, Users, RotateCcw, GitCompare } from "lucide-react";
 import type { VantageSnapshot } from "../../types";
+import { extractAllRetailClients } from "../../utils/snapshotHelpers";
 
 interface SnapshotTimelineProps {
   snapshots: VantageSnapshot[];
@@ -45,9 +46,7 @@ export default function SnapshotTimeline({
 
   // Calculate metrics for a snapshot
   const getSnapshotMetrics = (snapshot: VantageSnapshot) => {
-    const allClients = snapshot.retailResults.flatMap(
-      (result) => result.retail?.data || []
-    );
+    const allClients = extractAllRetailClients(snapshot);
     
     const totalEquity = allClients.reduce((sum, c) => sum + (c.equity || 0), 0);
     const totalBalance = allClients.reduce((sum, c) => sum + (c.accountBalance || 0), 0);

@@ -1,17 +1,42 @@
 import { useState, useMemo } from "react";
 import { Search, Filter, ArrowUpDown } from "lucide-react";
 import type { RebateWithStatus } from "../../utils/rebateStatus";
+import type { VantageSnapshot } from "../../types";
 import RebateRow from "./RebateRow";
+import { getClientsByOwner } from "../../utils/snapshotHelpers";
 
 interface RebatesTableProps {
   rebates: RebateWithStatus[];
+  currentSnapshot: VantageSnapshot | null;
   onRebateClick?: (rebate: RebateWithStatus) => void;
 }
 
 type SortField = "commission" | "equity" | "status" | "userId";
 type SortDirection = "asc" | "desc";
 
-export default function RebatesTable({ rebates, onRebateClick }: RebatesTableProps) {
+export default function RebatesTable({ rebates, currentSnapshot, onRebateClick }: RebatesTableProps) {
+  // Helper function to find owner name for an account by login
+  // Note: In new structure, accounts don't have direct login-to-owner mapping
+  // This function tries to find owner by matching account userId with clients
+  const findOwnerForAccount = (login: number): string | null => {
+    if (!currentSnapshot) return null;
+    
+    // Try to find account by login
+    const account = currentSnapshot.accounts.find(acc => acc.login === login);
+    if (!account) return null;
+    
+    // Try to find client with matching userId to get ownerName
+    const clientsByOwner = getClientsByOwner(currentSnapshot);
+    for (const [ownerName, clients] of clientsByOwner.entries()) {
+      if (clients.some(client => client.userId === account.userId)) {
+        return ownerName;
+      }
+    }
+    
+    // Fallback: try legacy structure
+    const retailResult = currentSnapshot.retailResults.find(r => r.login === login);
+    return retailResult?.ownerName || null;
+  };
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<RebateWithStatus["status"] | "all">("all");
   const [sortField, setSortField] = useState<SortField>("commission");
@@ -195,9 +220,17 @@ export default function RebatesTable({ rebates, onRebateClick }: RebatesTablePro
       {/* Rebates List */}
       <div className="space-y-2 max-h-[600px] overflow-y-auto">
         {sortedRebates.length > 0 ? (
-          sortedRebates.map((rebate) => (
-            <RebateRow key={rebate.id} rebate={rebate} onClick={onRebateClick} />
-          ))
+          sortedRebates.map((rebate) => {
+            const ownerName = findOwnerForAccount(rebate.login);
+            return (
+              <RebateRow 
+                key={rebate.id} 
+                rebate={rebate} 
+                ownerName={ownerName}
+                onClick={onRebateClick} 
+              />
+            );
+          })
         ) : (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <p>No rebates found matching your filters</p>

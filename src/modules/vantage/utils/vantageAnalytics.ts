@@ -1,4 +1,5 @@
 import type { VantageSnapshot } from "../types";
+import { extractAllRetailClients } from "./snapshotHelpers";
 
 export interface FinancialMetrics {
   // Totales
@@ -76,10 +77,8 @@ export function calculateMetrics(snapshot: VantageSnapshot): FinancialMetrics {
   const totalBalance = snapshot.accounts.reduce((sum, acc) => sum + acc.balance, 0);
   const totalProfit = snapshot.accounts.reduce((sum, acc) => sum + acc.profit, 0);
 
-  // Extraer todos los retail clients
-  const allClients = snapshot.retailResults.flatMap(
-    (result) => result.retail?.data || []
-  );
+  // Extraer todos los retail clients (supports new and legacy structure)
+  const allClients = extractAllRetailClients(snapshot);
 
   // Métricas de Retail Clients
   const totalRetailEquity = allClients.reduce((sum, client) => sum + (client.equity || 0), 0);
@@ -237,26 +236,16 @@ export function compareSnapshots(
   const activeTradersChange = currMetrics.clientsWithTradingActivity - prevMetrics.clientsWithTradingActivity;
 
   // Clientes perdidos y ganados (usando comparison result)
-  const prevClientIds = new Set(
-    previous.retailResults.flatMap((r) =>
-      (r.retail?.data || []).map((c) => c.userId)
-    )
-  );
-  const currClientIds = new Set(
-    current.retailResults.flatMap((r) =>
-      (r.retail?.data || []).map((c) => c.userId)
-    )
-  );
+  const prevClients = extractAllRetailClients(previous);
+  const currClients = extractAllRetailClients(current);
+  const prevClientIds = new Set(prevClients.map((c) => c.userId));
+  const currClientIds = new Set(currClients.map((c) => c.userId));
 
   const clientsLost = [...prevClientIds].filter((id) => !currClientIds.has(id)).length;
   const clientsGained = [...currClientIds].filter((id) => !prevClientIds.has(id)).length;
 
   // Clientes de alto valor perdidos
-  const prevClientsMap = new Map(
-    previous.retailResults.flatMap((r) =>
-      (r.retail?.data || []).map((c) => [c.userId, c])
-    )
-  );
+  const prevClientsMap = new Map(prevClients.map((c) => [c.userId, c]));
 
   const highValueClientsLost = [...prevClientIds]
     .filter((id) => !currClientIds.has(id))
@@ -272,11 +261,7 @@ export function compareSnapshots(
     .sort((a, b) => b.lastEquity - a.lastEquity);
 
   // Retiros significativos (clientes que aún existen pero con equity reducido)
-  const currClientsMap = new Map(
-    current.retailResults.flatMap((r) =>
-      (r.retail?.data || []).map((c) => [c.userId, c])
-    )
-  );
+  const currClientsMap = new Map(currClients.map((c) => [c.userId, c]));
 
   const significantWithdrawals = [...currClientIds]
     .filter((id) => prevClientIds.has(id))

@@ -1,4 +1,5 @@
 import type { VantageSnapshot, RetailClient, Account } from "../types";
+import { extractAllRetailClients } from "./snapshotHelpers";
 
 export interface VolumeMetrics {
   userId: number;
@@ -42,10 +43,8 @@ export function calculateVolumeLeaderboard(
   const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
   const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-  // Get all current clients
-  const currentClients = currentSnapshot.retailResults.flatMap(
-    (result) => result.retail?.data || []
-  );
+  // Get all current clients (supports new and legacy structure)
+  const currentClients = extractAllRetailClients(currentSnapshot);
 
   // Create accounts map
   const accountsMap = new Map<number, Account>();
@@ -65,7 +64,7 @@ export function calculateVolumeLeaderboard(
   ];
 
   allSnapshots.forEach(({ snapshot }) => {
-    const clients = snapshot.retailResults.flatMap((result) => result.retail?.data || []);
+    const clients = extractAllRetailClients(snapshot);
     clients.forEach((client) => {
       if (!volumeHistory.has(client.userId)) {
         volumeHistory.set(client.userId, []);

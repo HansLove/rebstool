@@ -1,4 +1,5 @@
 import type { VantageSnapshot, RetailClient, Account } from "../types";
+import { extractAllRetailClients } from "./snapshotHelpers";
 
 export interface DepositMetrics {
   userId: number;
@@ -41,10 +42,8 @@ export function analyzeDeposits(
   const now = Date.now();
   const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-  // Get all current clients
-  const currentClients = currentSnapshot.retailResults.flatMap(
-    (result) => result.retail?.data || []
-  );
+  // Get all current clients (supports new and legacy structure)
+  const currentClients = extractAllRetailClients(currentSnapshot);
 
   // Create accounts map
   const accountsMap = new Map<number, Account>();
@@ -65,7 +64,7 @@ export function analyzeDeposits(
   ];
 
   allSnapshots.forEach(({ snapshot }) => {
-    const clients = snapshot.retailResults.flatMap((result) => result.retail?.data || []);
+    const clients = extractAllRetailClients(snapshot);
     clients.forEach((client) => {
       if (!depositHistory.has(client.userId)) {
         depositHistory.set(client.userId, []);

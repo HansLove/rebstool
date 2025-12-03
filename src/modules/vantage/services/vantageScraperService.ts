@@ -51,21 +51,38 @@ export async function fetchVantageData(
     const snapshotId = response.data.snapshotId || `snapshot_${Date.now()}`;
     const timestamp = Date.now();
 
-    // Create snapshot with data from API response
-    const snapshot: VantageSnapshot = {
+    // Transform API response to internal format
+    // The API might return new structure (with sub_ibs) or legacy structure
+    // Use transformer to handle both cases
+    const apiData = response.data.data;
+    const apiSnapshotData: any = {
       id: snapshotId,
       timestamp,
-      scrapedAt: new Date().toISOString(),
-      accounts: response.data.data.accounts || [],
-      retailResults: response.data.data.retailResults || [],
-      metadata: {
-        totalAccounts: response.data.data.accounts?.length || 0,
-        totalRetailClients: response.data.data.retailResults?.reduce(
-          (sum, r) => sum + (r.retail?.data?.length || 0),
-          0
-        ) || 0,
-      },
+      scraped_at: new Date().toISOString(),
+      total_accounts: apiData.accounts?.length || 0,
+      total_retail_clients: apiData.retailResults?.reduce(
+        (sum: number, r: any) => sum + (r.retail?.data?.length || 0),
+        0
+      ) || 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
+
+    // Check if new structure (with sub_ibs) or legacy structure
+    if (apiData.sub_ibs) {
+      // New unified structure
+      apiSnapshotData.accounts = apiData.accounts || [];
+      apiSnapshotData.sub_ibs = apiData.sub_ibs || [];
+      if (apiData.all_clients) {
+        apiSnapshotData.all_clients = apiData.all_clients;
+      }
+    } else {
+      // Legacy structure
+      apiSnapshotData.VantageAccounts = apiData.accounts || [];
+      apiSnapshotData.VantageRetailHeaders = []; // Legacy structure not used in POST response
+    }
+
+    const snapshot = transformApiSnapshotToSnapshot(apiSnapshotData);
 
     return snapshot;
   } catch (error: any) {

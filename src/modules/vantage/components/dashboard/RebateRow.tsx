@@ -3,10 +3,11 @@ import type { RebateWithStatus } from "../../utils/rebateStatus";
 
 interface RebateRowProps {
   rebate: RebateWithStatus;
+  ownerName?: string | null;
   onClick?: (rebate: RebateWithStatus) => void;
 }
 
-export default function RebateRow({ rebate, onClick }: RebateRowProps) {
+export default function RebateRow({ rebate, ownerName, onClick }: RebateRowProps) {
   const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -79,6 +80,11 @@ export default function RebateRow({ rebate, onClick }: RebateRowProps) {
           </div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
             User ID: {rebate.userId}
+            {ownerName && (
+              <span className="ml-2 text-xs font-normal text-blue-600 dark:text-blue-400">
+                ({ownerName})
+              </span>
+            )}
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">
             Login: {rebate.login} | {rebate.currency}

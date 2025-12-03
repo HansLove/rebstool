@@ -20,6 +20,7 @@ const WithdrawalIntelligencePage = lazy(() => import("@/modules/vantage/pages/Wi
 const VolumeLeaderboardPage = lazy(() => import("@/modules/vantage/pages/VolumeLeaderboardPage"));
 const LotsAnalyzerPage = lazy(() => import("@/modules/vantage/pages/LotsAnalyzerPage"));
 const DepositIntelligencePage = lazy(() => import("@/modules/vantage/pages/DepositIntelligencePage"));
+const SubIBAnalyticsPage = lazy(() => import("@/modules/vantage/pages/SubIBAnalyticsPage"));
 const Journal = lazy(() => import("../../pages/journal/Journal"));
 
 export default function AppRouter(): JSX.Element {
@@ -75,6 +76,7 @@ export default function AppRouter(): JSX.Element {
           <Route path="volume-leaderboard" element={withSuspense(VolumeLeaderboardPage)} />
           <Route path="lots-analyzer" element={withSuspense(LotsAnalyzerPage)} />
           <Route path="deposit-intelligence" element={withSuspense(DepositIntelligencePage)} />
+          <Route path="sub-ib-analytics" element={withSuspense(SubIBAnalyticsPage)} />
           <Route path="journal" element={withSuspense(Journal)} />
         </Route>
       </Route>

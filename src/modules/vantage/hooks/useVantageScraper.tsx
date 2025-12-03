@@ -225,13 +225,25 @@ export function useVantageScraper(): UseVantageScraperReturn {
       const previousSummary = snapshotsData.snapshots[1] || null;
 
       try {
+        // Always fetch with clients included for proper comparison
         const latestFull = await fetchSnapshotById(latestSummary.id, true, 10000);
         setCurrentSnapshot(latestFull);
 
         if (previousSummary) {
           const previousFull = await fetchSnapshotById(previousSummary.id, true, 10000);
           setPreviousSnapshot(previousFull);
+          
+          // Debug: Log snapshot info
+          const prevClients = previousFull.subIBs?.reduce((sum, sib) => sum + (sib.clients?.length || 0), 0) || 0;
+          const currClients = latestFull.subIBs?.reduce((sum, sib) => sum + (sib.clients?.length || 0), 0) || 0;
+          console.log('[resetToLatest] Previous snapshot clients:', prevClients, 'Current snapshot clients:', currClients);
+          
           const comparison = compareSnapshots(previousFull, latestFull);
+          console.log('[resetToLatest] Comparison result:', {
+            new: comparison.summary.totalNew,
+            removed: comparison.summary.totalRemoved,
+            changed: comparison.summary.totalChanged
+          });
           setComparisonResult(comparison);
         } else {
           setPreviousSnapshot(null);

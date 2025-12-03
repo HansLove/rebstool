@@ -56,6 +56,7 @@ export function calculateRebateStatus(
 
 /**
  * Get all rebates with status from current and previous snapshots
+ * Now handles multiple accounts per userId (sub-ids)
  */
 export function getRebatesWithStatus(
   currentSnapshot: VantageSnapshot | null,
@@ -64,15 +65,42 @@ export function getRebatesWithStatus(
 ): RebateWithStatus[] {
   if (!currentSnapshot) return [];
 
-  const previousAccountsMap = new Map<number, Account>();
+  // Map by login (unique identifier) for exact matching
+  const previousAccountsByLogin = new Map<number, Account>();
+  // Also map by userId for fallback when login doesn't match
+  const previousAccountsByUserId = new Map<number, Account[]>();
+  
   if (previousSnapshot) {
     previousSnapshot.accounts.forEach((acc) => {
-      previousAccountsMap.set(acc.userId, acc);
+      // Map by login for exact matching
+      previousAccountsByLogin.set(acc.login, acc);
+      
+      // Map by userId for fallback (multiple accounts per userId)
+      if (!previousAccountsByUserId.has(acc.userId)) {
+        previousAccountsByUserId.set(acc.userId, []);
+      }
+      previousAccountsByUserId.get(acc.userId)!.push(acc);
     });
   }
 
   return currentSnapshot.accounts.map((account) => {
-    const previousAccount = previousAccountsMap.get(account.userId);
+    // Try to find previous account by login first (exact match)
+    let previousAccount = previousAccountsByLogin.get(account.login);
+    
+    // If no exact match, try to find by userId (for new accounts or when login changed)
+    // Use the first account with same userId, or aggregate if needed
+    if (!previousAccount && previousAccountsByUserId.has(account.userId)) {
+      const previousAccountsForUserId = previousAccountsByUserId.get(account.userId)!;
+      // If only one account for this userId, use it
+      if (previousAccountsForUserId.length === 1) {
+        previousAccount = previousAccountsForUserId[0];
+      } else {
+        // Multiple accounts for same userId - use the one with closest login or first one
+        // For now, use first one (can be enhanced to match by login proximity)
+        previousAccount = previousAccountsForUserId[0];
+      }
+    }
+    
     const status = calculateRebateStatus(account, previousAccount);
 
     const commissionChange = previousAccount

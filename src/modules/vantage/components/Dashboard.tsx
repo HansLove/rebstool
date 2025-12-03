@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useVantageScraper } from '../hooks/useVantageScraper';
 import useAuth from '@/core/hooks/useAuth';
-import { RefreshCw, AlertCircle, Users, TrendingDown, DollarSign, Clock, Calendar } from 'lucide-react';
+import { RefreshCw, AlertCircle, Users, TrendingDown, DollarSign, Clock, Calendar, Building2, Filter, X } from 'lucide-react';
 import type { VantageCredentials, RetailClient, Account, VantageSnapshot } from '../types';
 import MetricCard from './dashboard/MetricCard';
 import UserRow from './dashboard/UserRow';
@@ -16,6 +16,8 @@ import NetFunding from './dashboard/NetFunding';
 import { useUserTabs } from '../context/UserTabsContext';
 import { getRebatesWithStatus, type RebateWithStatus } from '../utils/rebateStatus';
 import SnapshotTimeline from './dashboard/SnapshotTimeline';
+import SubIBsPanel from './dashboard/SubIBsPanel';
+import { extractAllRetailClients, getClientsByOwner } from '../utils/snapshotHelpers';
 
 export default function Dashboard() {
   const { getUser } = useAuth();
@@ -52,14 +54,59 @@ export default function Dashboard() {
   // Snapshot range toggle - will be calculated based on available snapshots
   const [snapshotRange, setSnapshotRange] = useState<string | null>(null);
 
+  // Sub-IB filter
+  const [selectedSubIB, setSelectedSubIB] = useState<string | null>(null);
+
   // User tabs from context
   const { addTab, getActiveTab, removeTab } = useUserTabs();
 
+  // Get available Sub-IBs from current snapshot
+  // Prioritize new structure (subIBs) over legacy structure
+  const availableSubIBs = useMemo(() => {
+    if (!currentSnapshot) return [];
+    
+    // Priority 1: Use subIBs array directly (new unified structure)
+    if (currentSnapshot.subIBs && currentSnapshot.subIBs.length > 0) {
+      return currentSnapshot.subIBs
+        .map(subIB => subIB.ownerName)
+        .filter((name): name is string => !!name) // Filter out null/undefined
+        .sort();
+    }
+    
+    // Priority 2: Extract from allClients if available
+    if (currentSnapshot.allClients && currentSnapshot.allClients.length > 0) {
+      const ownerNames = new Set<string>();
+      currentSnapshot.allClients.forEach(client => {
+        if (client.ownerName) {
+          ownerNames.add(client.ownerName);
+        }
+      });
+      return Array.from(ownerNames).sort();
+    }
+    
+    // Priority 3: Fallback: extract from clients grouped by owner
+    const clientsByOwner = getClientsByOwner(currentSnapshot);
+    return Array.from(clientsByOwner.keys())
+      .filter((name): name is string => !!name && name !== "Unknown")
+      .sort();
+  }, [currentSnapshot]);
+
   // Calculate users who lost significant money (>$500 loss)
   const usersWhoLostMoney = useMemo(() => {
-    if (!comparisonResult) return [];
-    return comparisonResult.changedUsers
+    if (!comparisonResult || !comparisonResult.changedUsers) return [];
+    
+    const users = comparisonResult.changedUsers
       .filter(changedUser => {
+        // Ensure user has ownerName (for filtering)
+        if (!changedUser.user.ownerName && currentSnapshot) {
+          // Try to find ownerName from current snapshot
+          const allClients = extractAllRetailClients(currentSnapshot);
+          const foundClient = allClients.find(c => c.userId === changedUser.user.userId);
+          if (foundClient?.ownerName) {
+            changedUser.user.ownerName = foundClient.ownerName;
+          }
+        }
+        
         const equityChange = changedUser.changes.find(c => c.field === 'equity');
         if (!equityChange) return false;
         const oldEquity = equityChange.oldValue as number;
@@ -79,13 +126,30 @@ export default function Dashboard() {
         };
       })
       .sort((a, b) => b.loss - a.loss);
-  }, [comparisonResult]);
+
+    // Filter by Sub-IB if selected
+    if (selectedSubIB) {
+      return users.filter(user => user.ownerName === selectedSubIB);
+    }
+    return users;
+  }, [comparisonResult, selectedSubIB, currentSnapshot]);
 
   // Calculate critical withdrawals (>$1000 withdrawn)
   const criticalWithdrawals = useMemo(() => {
-    if (!comparisonResult) return [];
-    return comparisonResult.changedUsers
+    if (!comparisonResult || !comparisonResult.changedUsers) return [];
+    
+    const withdrawals = comparisonResult.changedUsers
       .filter(changedUser => {
+        // Ensure user has ownerName (for filtering)
+        if (!changedUser.user.ownerName && currentSnapshot) {
+          // Try to find ownerName from current snapshot
+          const allClients = extractAllRetailClients(currentSnapshot);
+          const foundClient = allClients.find(c => c.userId === changedUser.user.userId);
+          if (foundClient?.ownerName) {
+            changedUser.user.ownerName = foundClient.ownerName;
+          }
+        }
+        
         const equityChange = changedUser.changes.find(c => c.field === 'equity');
         if (!equityChange) return false;
         const oldEquity = equityChange.oldValue as number;
@@ -105,7 +169,36 @@ export default function Dashboard() {
         };
       })
       .sort((a, b) => b.withdrawal - a.withdrawal);
-  }, [comparisonResult]);
+
+    // Filter by Sub-IB if selected
+    if (selectedSubIB) {
+      return withdrawals.filter(user => user.ownerName === selectedSubIB);
+    }
+    return withdrawals;
+  }, [comparisonResult, selectedSubIB, currentSnapshot]);
+
+  // Filter removed users by Sub-IB
+  const filteredRemovedUsers = useMemo(() => {
+    if (!comparisonResult || !comparisonResult.removedUsers) return [];
+    
+    // Ensure all removed users have ownerName assigned
+    const removed = (comparisonResult.removedUsers || []).map(user => {
+      // If user doesn't have ownerName, try to find it from previous snapshot
+      if (!user.ownerName && previousSnapshot) {
+        const allClients = extractAllRetailClients(previousSnapshot);
+        const foundClient = allClients.find(c => c.userId === user.userId);
+        if (foundClient?.ownerName) {
+          return { ...user, ownerName: foundClient.ownerName };
+        }
+      }
+      return user;
+    });
+    
+    if (selectedSubIB) {
+      return removed.filter(user => user.ownerName === selectedSubIB);
+    }
+    return removed;
+  }, [comparisonResult, selectedSubIB, previousSnapshot]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -231,16 +324,16 @@ export default function Dashboard() {
   }, [availableRanges, snapshotRange]);
 
   // Handle snapshot range selection
-  const handleSnapshotRangeSelect = (rangeLabel: string) => {
+  const handleSnapshotRangeSelect = async (rangeLabel: string) => {
     setSnapshotRange(rangeLabel);
     const selectedRange = availableRanges.find(r => r.label === rangeLabel);
     
     if (selectedRange?.snapshot) {
       // Automatically select the snapshot for comparison
-      selectSnapshotForComparison(selectedRange.snapshot.id);
+      await selectSnapshotForComparison(selectedRange.snapshot.id);
     } else if (rangeLabel === 'Latest') {
       // Reset to latest comparison
-      resetToLatest();
+      await resetToLatest();
     }
   };
 
@@ -277,14 +370,22 @@ export default function Dashboard() {
     }).format(date);
   };
 
-  // Find account for a user
+  // Find all accounts for a user (can have multiple sub-ids)
+  const findAccountsForUser = (userId: number): Account[] => {
+    if (!currentSnapshot) return [];
+    return currentSnapshot.accounts.filter(acc => acc.userId === userId);
+  };
+
+  // Find account for a user (returns first account, for backward compatibility)
   const findAccountForUser = (userId: number): Account | undefined => {
-    if (!currentSnapshot) return undefined;
-    return currentSnapshot.accounts.find(acc => acc.userId === userId);
+    const accounts = findAccountsForUser(userId);
+    return accounts.length > 0 ? accounts[0] : undefined;
   };
 
   // Handle user click - open in tab
   const handleUserClick = (user: RetailClient) => {
+    // Try to find account matching user's owner or userId
+    // If multiple accounts exist, use the first one (can be enhanced later)
     const account = findAccountForUser(user.userId);
     addTab(user, account);
   };
@@ -297,7 +398,7 @@ export default function Dashboard() {
     if (!currentSnapshot) return;
 
     // Find the retail client associated with this rebate account
-    const allClients = currentSnapshot.retailResults.flatMap(result => result.retail?.data || []);
+    const allClients = extractAllRetailClients(currentSnapshot);
     const associatedUser = allClients.find(client => client.userId === rebate.userId);
 
     if (associatedUser) {
@@ -393,10 +494,60 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Sub-IB Filter - Above Central Search */}
+      {availableSubIBs.length > 0 && (
+        <div className="mb-3">
+          <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Sub-IB:</span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setSelectedSubIB(null)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    selectedSubIB === null
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  All Sub-IBs
+                </button>
+                {availableSubIBs.map(subIB => (
+                  <button
+                    key={subIB}
+                    onClick={() => setSelectedSubIB(subIB)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                      selectedSubIB === subIB
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Building2 className="h-3.5 w-3.5" />
+                    <span className="truncate max-w-[150px]">{subIB}</span>
+                    {selectedSubIB === subIB && (
+                      <X className="h-3 w-3" onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSubIB(null);
+                      }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Central Search - Full Width */}
       <div className="mb-3">
         <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-          <CentralSearch currentSnapshot={currentSnapshot} onUserClick={handleUserClick} />
+          <CentralSearch 
+            currentSnapshot={currentSnapshot} 
+            onUserClick={handleUserClick}
+            filterBySubIB={selectedSubIB}
+          />
         </div>
       </div>
 
@@ -406,15 +557,15 @@ export default function Dashboard() {
           {/* 1. Disappeared Users */}
           <MetricCard
             title="Disappeared Users"
-            count={comparisonResult?.removedUsers?.length || 0}
+            count={filteredRemovedUsers.length}
             icon={<Users className="h-5 w-5" />}
             color="red"
             isExpanded={expandedSections.disappeared}
             onToggle={() => toggleSection('disappeared')}
           >
-            {comparisonResult && comparisonResult.removedUsers.length > 0 ? (
+            {filteredRemovedUsers.length > 0 ? (
               <div className="space-y-2">
-                {comparisonResult.removedUsers.map(user => (
+                {filteredRemovedUsers.map(user => (
                   <UserRow
                     key={user.userId}
                     user={user}
@@ -424,7 +575,13 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">No users disappeared</p>
+              <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                {!comparisonResult 
+                  ? 'No comparison data available. Capture another snapshot to compare.'
+                  : selectedSubIB 
+                    ? `No users disappeared from ${selectedSubIB}` 
+                    : 'No users disappeared'}
+              </p>
             )}
           </MetricCard>
 
@@ -451,7 +608,11 @@ export default function Dashboard() {
               </div>
             ) : (
               <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                No significant losses detected
+                {!comparisonResult 
+                  ? 'No comparison data available. Capture another snapshot to compare.'
+                  : selectedSubIB 
+                    ? `No significant losses detected for ${selectedSubIB}` 
+                    : 'No significant losses detected'}
               </p>
             )}
           </MetricCard>
@@ -479,7 +640,11 @@ export default function Dashboard() {
               </div>
             ) : (
               <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                No critical withdrawals detected
+                {!comparisonResult 
+                  ? 'No comparison data available. Capture another snapshot to compare.'
+                  : selectedSubIB 
+                    ? `No critical withdrawals detected for ${selectedSubIB}` 
+                    : 'No critical withdrawals detected'}
               </p>
             )}
           </MetricCard>
@@ -494,7 +659,7 @@ export default function Dashboard() {
             <TopAtRiskUsers
               usersWhoLostMoney={usersWhoLostMoney}
               criticalWithdrawals={criticalWithdrawals}
-              disappearedUsers={comparisonResult?.removedUsers || []}
+              disappearedUsers={filteredRemovedUsers}
               onUserClick={handleUserClick}
             />
           </div>
@@ -507,7 +672,11 @@ export default function Dashboard() {
 
       {/* Rebates Table */}
       <div className="mb-3">
-        <RebatesTable rebates={rebatesWithStatus} onRebateClick={handleRebateClick} />
+        <RebatesTable 
+          rebates={rebatesWithStatus} 
+          currentSnapshot={currentSnapshot}
+          onRebateClick={handleRebateClick} 
+        />
       </div>
 
       {/* Rebates KPIs Panel - Secondary Information */}
@@ -530,7 +699,7 @@ export default function Dashboard() {
             snapshots30d={snapshots30d}
             onUserClick={userId => {
               if (!currentSnapshot) return;
-              const allClients = currentSnapshot.retailResults.flatMap(result => result.retail?.data || []);
+              const allClients = extractAllRetailClients(currentSnapshot);
               const user = allClients.find(c => c.userId === userId);
               if (user) {
                 handleUserClick(user);
@@ -543,7 +712,7 @@ export default function Dashboard() {
             snapshots30d={snapshots30d}
             onUserClick={userId => {
               if (!currentSnapshot) return;
-              const allClients = currentSnapshot.retailResults.flatMap(result => result.retail?.data || []);
+              const allClients = extractAllRetailClients(currentSnapshot);
               const user = allClients.find(c => c.userId === userId);
               if (user) {
                 handleUserClick(user);
@@ -552,6 +721,20 @@ export default function Dashboard() {
           />
         </div>
       </div>
+
+      {/* Sub-IBs Panel - New Unified Structure */}
+      {currentSnapshot?.subIBs && currentSnapshot.subIBs.length > 0 && (
+        <div className="mb-3">
+          <SubIBsPanel
+            currentSnapshot={currentSnapshot}
+            previousSnapshot={previousSnapshot}
+            onSubIBClick={(subIB) => {
+              // Handle Sub-IB click - could open a modal or navigate
+              console.log('Sub-IB clicked:', subIB);
+            }}
+          />
+        </div>
+      )}
 
       {/* Snapshot Timeline - Calendar View */}
       <div className="mb-3">

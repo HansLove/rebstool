@@ -1,4 +1,5 @@
 import type { VantageSnapshot, RetailClient } from "../types";
+import { extractAllRetailClients } from "./snapshotHelpers";
 
 export type WithdrawalAlertLevel = "none" | "warning" | "critical" | "emptied";
 
@@ -56,10 +57,8 @@ export function calculateWithdrawalIntelligence(
   const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
   const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-  // Get all current clients
-  const currentClients = currentSnapshot.retailResults.flatMap(
-    (result) => result.retail?.data || []
-  );
+  // Get all current clients (supports new and legacy structure)
+  const currentClients = extractAllRetailClients(currentSnapshot);
 
   // Build historical equity map for each user
   const equityHistory = new Map<number, Array<{ equity: number; timestamp: number }>>();
@@ -77,9 +76,7 @@ export function calculateWithdrawalIntelligence(
 
   // Add previous snapshot equity if available (most recent comparison point)
   if (previousSnapshot) {
-    const previousClients = previousSnapshot.retailResults.flatMap(
-      (result) => result.retail?.data || []
-    );
+    const previousClients = extractAllRetailClients(previousSnapshot);
     previousClients.forEach((client) => {
       if (!equityHistory.has(client.userId)) {
         equityHistory.set(client.userId, []);
@@ -97,7 +94,7 @@ export function calculateWithdrawalIntelligence(
   );
   
   allHistoricalSnapshots.forEach((snapshot) => {
-    const clients = snapshot.retailResults.flatMap((result) => result.retail?.data || []);
+    const clients = extractAllRetailClients(snapshot);
     clients.forEach((client) => {
       if (!equityHistory.has(client.userId)) {
         equityHistory.set(client.userId, []);
@@ -122,9 +119,7 @@ export function calculateWithdrawalIntelligence(
     // Use previous snapshot equity if available (most accurate comparison)
     let previousEquity = currentEquity;
     if (previousSnapshot) {
-      const previousClients = previousSnapshot.retailResults.flatMap(
-        (result) => result.retail?.data || []
-      );
+      const previousClients = extractAllRetailClients(previousSnapshot);
       const previousClient = previousClients.find((c) => c.userId === client.userId);
       if (previousClient) {
         previousEquity = previousClient.equity || 0;

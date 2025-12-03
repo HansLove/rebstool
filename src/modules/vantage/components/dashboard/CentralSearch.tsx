@@ -2,27 +2,28 @@ import { useState, useMemo } from "react";
 import { Search, X, MessageCircle, User, DollarSign, TrendingDown } from "lucide-react";
 import type { VantageSnapshot, RetailClient } from "../../types";
 import { formatPhoneNumber, getWhatsAppUrl } from "../../utils/phoneFormatter";
+import { extractAllRetailClients } from "../../utils/snapshotHelpers";
 
 interface CentralSearchProps {
   currentSnapshot: VantageSnapshot | null;
   onUserClick?: (user: RetailClient) => void;
+  filterBySubIB?: string | null;
 }
 
-export default function CentralSearch({ currentSnapshot, onUserClick }: CentralSearchProps) {
+export default function CentralSearch({ currentSnapshot, onUserClick, filterBySubIB }: CentralSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<RetailClient | null>(null);
 
-  // Extract all retail clients from snapshot
+  // Extract all retail clients from snapshot (supports new and legacy structure)
   const allClients = useMemo(() => {
     if (!currentSnapshot) return [];
-    const clients: RetailClient[] = [];
-    currentSnapshot.retailResults.forEach((result) => {
-      if (result.retail?.data && Array.isArray(result.retail.data)) {
-        clients.push(...result.retail.data);
-      }
-    });
+    const clients = extractAllRetailClients(currentSnapshot);
+    // Filter by Sub-IB if specified
+    if (filterBySubIB) {
+      return clients.filter(client => client.ownerName === filterBySubIB);
+    }
     return clients;
-  }, [currentSnapshot]);
+  }, [currentSnapshot, filterBySubIB]);
 
   // Simple search - matches name, userId, or phone
   const searchResults = useMemo(() => {

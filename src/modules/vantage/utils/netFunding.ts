@@ -1,4 +1,5 @@
 import type { VantageSnapshot, RetailClient, Account } from "../types";
+import { extractAllRetailClients } from "./snapshotHelpers";
 
 export interface NetFundingMetrics {
   userId: number;
@@ -31,10 +32,8 @@ export function calculateNetFunding(
   const now = Date.now();
   const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-  // Get all current clients
-  const currentClients = currentSnapshot.retailResults.flatMap(
-    (result) => result.retail?.data || []
-  );
+  // Get all current clients (supports new and legacy structure)
+  const currentClients = extractAllRetailClients(currentSnapshot);
 
   // Create accounts map
   const accountsMap = new Map<number, Account>();
@@ -72,9 +71,7 @@ export function calculateNetFunding(
 
   // Process historical snapshots
   allSnapshots.forEach((snapshot) => {
-    const clients = snapshot.retailResults.flatMap(
-      (result) => result.retail?.data || []
-    );
+    const clients = extractAllRetailClients(snapshot);
     clients.forEach((client) => {
       // Track deposits
       if (client.lastDepositTime && client.lastDepositAmount) {
@@ -116,9 +113,7 @@ export function calculateNetFunding(
     let lastWithdrawalTime: number | null = null;
 
     if (previousSnapshot) {
-      const previousClients = previousSnapshot.retailResults.flatMap(
-        (result) => result.retail?.data || []
-      );
+      const previousClients = extractAllRetailClients(previousSnapshot);
       const previousClient = previousClients.find((c) => c.userId === client.userId);
       
       if (previousClient) {
@@ -136,9 +131,7 @@ export function calculateNetFunding(
     // Also check historical snapshots for withdrawals
     const equityHistory: Array<{ equity: number; timestamp: number }> = [];
     allSnapshots.forEach((snapshot) => {
-      const snapshotClients = snapshot.retailResults.flatMap(
-        (result) => result.retail?.data || []
-      );
+      const snapshotClients = extractAllRetailClients(snapshot);
       const snapshotClient = snapshotClients.find((c) => c.userId === client.userId);
       if (snapshotClient) {
         equityHistory.push({

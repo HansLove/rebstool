@@ -1,4 +1,4 @@
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Building2 } from "lucide-react";
 import { getWhatsAppUrl } from "../../utils/phoneFormatter";
 import type { RetailClient } from "../../types";
 
@@ -37,9 +37,17 @@ export default function UserRow({ user, metric, subMetric, onContact, onClick }:
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {user.name}
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-          ID: {user.userId}
-        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+            ID: {user.userId}
+          </p>
+          {user.ownerName && (
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 rounded text-xs text-blue-700 dark:text-blue-300">
+              <Building2 className="h-3 w-3" />
+              <span className="font-medium truncate max-w-[120px]">{user.ownerName}</span>
+            </div>
+          )}
+        </div>
         {subMetric && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{subMetric}</p>
         )}

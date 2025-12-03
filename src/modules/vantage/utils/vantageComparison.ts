@@ -5,19 +5,7 @@ import type {
   ChangedUser,
   FieldChange,
 } from "../types";
-
-/**
- * Extracts all retail clients from a snapshot
- */
-function extractAllRetailClients(snapshot: VantageSnapshot): RetailClient[] {
-  const clients: RetailClient[] = [];
-  snapshot.retailResults.forEach((result) => {
-    if (result.retail?.data && Array.isArray(result.retail.data)) {
-      clients.push(...result.retail.data);
-    }
-  });
-  return clients;
-}
+import { extractAllRetailClients } from "./snapshotHelpers";
 
 /**
  * Detects changes between two retail client objects
@@ -75,6 +63,24 @@ export function compareSnapshots(
   const previousUsers = extractAllRetailClients(previous);
   const currentUsers = extractAllRetailClients(current);
 
+  // Debug: Log extraction results
+  console.log('[compareSnapshots] Previous snapshot:', {
+    id: previous.id,
+    timestamp: new Date(previous.timestamp).toISOString(),
+    subIBsCount: previous.subIBs?.length || 0,
+    subIBsWithClients: previous.subIBs?.filter(sib => sib.clients && sib.clients.length > 0).length || 0,
+    extractedClients: previousUsers.length,
+    allClients: previous.allClients?.length || 0
+  });
+  console.log('[compareSnapshots] Current snapshot:', {
+    id: current.id,
+    timestamp: new Date(current.timestamp).toISOString(),
+    subIBsCount: current.subIBs?.length || 0,
+    subIBsWithClients: current.subIBs?.filter(sib => sib.clients && sib.clients.length > 0).length || 0,
+    extractedClients: currentUsers.length,
+    allClients: current.allClients?.length || 0
+  });
+
   // Create maps for efficient lookup
   const previousMap = new Map<number, RetailClient>(
     previousUsers.map((u) => [u.userId, u])
@@ -87,7 +93,21 @@ export function compareSnapshots(
   const newUsers = currentUsers.filter((u) => !previousMap.has(u.userId));
 
   // Find removed users (in previous but not in current)
-  const removedUsers = previousUsers.filter((u) => !currentMap.has(u.userId));
+  // Ensure removed users have ownerName assigned
+  const removedUsers = previousUsers
+    .filter((u) => !currentMap.has(u.userId))
+    .map((u) => {
+      // If removed user doesn't have ownerName, try to preserve it from previous snapshot metadata
+      if (!u.ownerName && previous.metadata?.clientsByOwner) {
+        // Search in metadata to find ownerName
+        for (const [ownerName, clients] of previous.metadata.clientsByOwner.entries()) {
+          if (clients.some(c => c.userId === u.userId)) {
+            return { ...u, ownerName };
+          }
+        }
+      }
+      return u;
+    });
 
   // Find changed users (in both but with modifications)
   const changedUsers: ChangedUser[] = currentUsers

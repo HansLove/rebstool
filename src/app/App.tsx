@@ -8,9 +8,9 @@ import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
 import AppRouter from './routes/AppRouter';
-import NotificationsManager from '../components/NotificationsManager';
+// import NotificationsManager from '../components/NotificationsManager';
 import { darkToastStyles, lightToastStyles } from '@/constants/toast';
-import { UserBalanceProvider } from '@/context/UserBalanceProvider';
+// import { UserBalanceProvider } from '@/context/UserBalanceProvider';
 
 function App() {
   const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID;
@@ -56,7 +56,6 @@ function App() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <UserBalanceProvider>
           <RainbowKitProvider modalSize="compact">
             <BrowserRouter>
               <Toaster
@@ -100,11 +99,10 @@ function App() {
                   </ToastBar>
                 )}
               </Toaster>
-              <NotificationsManager isDarkMode={isDarkMode} />
+              {/* <NotificationsManager isDarkMode={isDarkMode} /> */}
               <AppRouter />
             </BrowserRouter>
           </RainbowKitProvider>
-        </UserBalanceProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
