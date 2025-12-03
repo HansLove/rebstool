@@ -26,6 +26,10 @@ export function useRebatesOverview({
   return useMemo(() => {
     if (!currentSnapshot) return null;
 
+    // Ensure arrays are defined
+    const safeSnapshots7d = snapshots7d || [];
+    const safeSnapshots30d = snapshots30d || [];
+
     const now = Date.now();
     const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
@@ -52,7 +56,7 @@ export function useRebatesOverview({
 
     // Create snapshots map for 30d calculations
     const snapshots30dMap = new Map<number, VantageSnapshot>();
-    snapshots30d.forEach((snapshot) => {
+    safeSnapshots30d.forEach((snapshot) => {
       const snapshotClients = snapshot.retailResults.flatMap(
         (result) => result.retail?.data || []
       );
@@ -67,7 +71,7 @@ export function useRebatesOverview({
     const historicalClients7d = new Map<number, any[]>();
     const historicalClients30d = new Map<number, any[]>();
 
-    snapshots7d.forEach((snapshot) => {
+    safeSnapshots7d.forEach((snapshot) => {
       const clients = snapshot.retailResults.flatMap((result) => result.retail?.data || []);
       clients.forEach((c) => {
         if (!historicalClients7d.has(c.userId)) {
@@ -77,7 +81,7 @@ export function useRebatesOverview({
       });
     });
 
-    snapshots30d.forEach((snapshot) => {
+    safeSnapshots30d.forEach((snapshot) => {
       const clients = snapshot.retailResults.flatMap((result) => result.retail?.data || []);
       clients.forEach((c) => {
         if (!historicalClients30d.has(c.userId)) {

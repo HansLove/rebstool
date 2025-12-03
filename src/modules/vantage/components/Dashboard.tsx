@@ -10,13 +10,10 @@ import UserInfoModal from "./dashboard/UserInfoModal";
 import RebatesTable from "./dashboard/RebatesTable";
 import RebatesKPIs from "./dashboard/RebatesKPIs";
 import TopAtRiskUsers from "./dashboard/TopAtRiskUsers";
+import MiniJournal from "./dashboard/MiniJournal";
 import { useUserTabs } from "../context/UserTabsContext";
 import { getRebatesWithStatus, type RebateWithStatus } from "../utils/rebateStatus";
-import { useRebatesOverview } from "../hooks/useRebatesOverview";
-import TradersTable from "./dashboard/TradersTable";
-import RebatesQuickRankings from "./dashboard/RebatesQuickRankings";
-import TraderDrawer from "./dashboard/TraderDrawer";
-import type { TraderKPI } from "../types/rebatesOverview";
+import SnapshotTimeline from "./dashboard/SnapshotTimeline";
 
 export default function Dashboard() {
   const { getUser } = useAuth();
@@ -162,23 +159,6 @@ export default function Dashboard() {
     return snapshots.filter((s) => s.timestamp >= sevenDaysAgo);
   }, [snapshots, currentSnapshot]);
 
-  const snapshots30d = useMemo(() => {
-    if (!currentSnapshot) return [];
-    const now = Date.now();
-    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-    return snapshots.filter((s) => s.timestamp >= thirtyDaysAgo);
-  }, [snapshots, currentSnapshot]);
-
-  // Get rebates overview data
-  const rebatesOverview = useRebatesOverview({
-    currentSnapshot,
-    previousSnapshot,
-    snapshots7d,
-    snapshots30d,
-  });
-
-  // State for trader drawer
-  const [selectedTrader, setSelectedTrader] = useState<TraderKPI | null>(null);
 
   if (!isAdmin) {
     return (
@@ -245,20 +225,6 @@ export default function Dashboard() {
     
     if (associatedUser) {
       addTab(associatedUser, rebate);
-    }
-  };
-
-  // Handle trader click - open drawer
-  const handleTraderClick = (trader: TraderKPI) => {
-    setSelectedTrader(trader);
-  };
-
-  // Handle trader click from rankings
-  const handleRankingTraderClick = (userId: number) => {
-    if (!rebatesOverview) return;
-    const trader = rebatesOverview.traders.find((t) => t.userId === userId);
-    if (trader) {
-      setSelectedTrader(trader);
     }
   };
 
@@ -413,55 +379,47 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Top 3 Users at Risk - Priority Section */}
+      {/* Top 3 Users at Risk and Mini Journal - Priority Section */}
       <div className="mb-3">
-        <TopAtRiskUsers
-          usersWhoLostMoney={usersWhoLostMoney}
-          criticalWithdrawals={criticalWithdrawals}
-          disappearedUsers={comparisonResult?.removedUsers || []}
-          onUserClick={handleUserClick}
-        />
-      </div>
-
-      {/* Rebates Overview - New Traders Table and Rankings */}
-      {rebatesOverview && (
-        <div className="mb-3">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Quick Rankings - Left Side */}
-            <div className="lg:col-span-1">
-              <RebatesQuickRankings
-                rankings={rebatesOverview.rankings}
-                isLoading={isLoading}
-                onTraderClick={handleRankingTraderClick}
-              />
-            </div>
-
-            {/* Traders Table - Right Side */}
-            <div className="lg:col-span-2">
-              <TradersTable
-                traders={rebatesOverview.traders}
-                onTraderClick={handleTraderClick}
-                isLoading={isLoading}
-              />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          {/* Top 3 Users at Risk - 2/3 width */}
+          <div className="lg:col-span-2">
+            <TopAtRiskUsers
+              usersWhoLostMoney={usersWhoLostMoney}
+              criticalWithdrawals={criticalWithdrawals}
+              disappearedUsers={comparisonResult?.removedUsers || []}
+              onUserClick={handleUserClick}
+            />
+          </div>
+          {/* Mini Journal - 1/3 width */}
+          <div className="lg:col-span-1">
+            <MiniJournal />
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Rebates Table - Bottom Half */}
+      {/* Rebates Table */}
       <div className="mb-3">
         <RebatesTable rebates={rebatesWithStatus} onRebateClick={handleRebateClick} />
       </div>
 
       {/* Rebates KPIs Panel - Secondary Information */}
       <div className="mb-3">
-            <RebatesKPIs
-              currentSnapshot={currentSnapshot}
-              previousSnapshot={previousSnapshot}
-              snapshots24h={snapshots24h}
-              snapshots7d={snapshots7d}
-            />
-          </div>
+        <RebatesKPIs
+          currentSnapshot={currentSnapshot}
+          previousSnapshot={previousSnapshot}
+          snapshots24h={snapshots24h}
+          snapshots7d={snapshots7d}
+        />
+      </div>
+
+      {/* Snapshot Timeline - Calendar View */}
+      <div className="mb-3">
+        <SnapshotTimeline
+          snapshots={snapshots}
+          currentSnapshot={currentSnapshot}
+        />
+      </div>
 
       {/* No Data State */}
       {!currentSnapshot && !isLoading && (
@@ -486,12 +444,6 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Trader Drawer */}
-      <TraderDrawer
-        trader={selectedTrader}
-        isOpen={!!selectedTrader}
-        onClose={() => setSelectedTrader(null)}
-      />
 
     </div>
   );
