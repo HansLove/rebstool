@@ -10,6 +10,7 @@ import {
 
 interface WithdrawalIntelligenceProps {
   currentSnapshot: VantageSnapshot | null;
+  previousSnapshot: VantageSnapshot | null;
   snapshots7d: VantageSnapshot[];
   snapshots30d: VantageSnapshot[];
   onUserClick?: (userId: number) => void;
@@ -17,6 +18,7 @@ interface WithdrawalIntelligenceProps {
 
 export default function WithdrawalIntelligence({
   currentSnapshot,
+  previousSnapshot,
   snapshots7d,
   snapshots30d,
   onUserClick,
@@ -26,9 +28,10 @@ export default function WithdrawalIntelligence({
     return calculateWithdrawalIntelligence(
       currentSnapshot,
       snapshots7d || [],
-      snapshots30d || []
+      snapshots30d || [],
+      previousSnapshot || null
     );
-  }, [currentSnapshot, snapshots7d, snapshots30d]);
+  }, [currentSnapshot, previousSnapshot, snapshots7d, snapshots30d]);
 
   if (!intelligence) {
     return (

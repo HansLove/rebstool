@@ -44,8 +44,9 @@ export interface WithdrawalIntelligenceResult {
  */
 export function calculateWithdrawalIntelligence(
   currentSnapshot: VantageSnapshot,
-  snapshots7d: VantageSnapshot[],
-  snapshots30d: VantageSnapshot[]
+  snapshots7d: VantageSnapshot[] = [],
+  snapshots30d: VantageSnapshot[] = [],
+  previousSnapshot: VantageSnapshot | null = null
 ): WithdrawalIntelligenceResult {
   // Ensure arrays are defined
   const safeSnapshots7d = snapshots7d || [];
@@ -74,8 +75,28 @@ export function calculateWithdrawalIntelligence(
     });
   });
 
-  // Add historical equity from snapshots
-  [...safeSnapshots7d, ...safeSnapshots30d].forEach((snapshot) => {
+  // Add previous snapshot equity if available (most recent comparison point)
+  if (previousSnapshot) {
+    const previousClients = previousSnapshot.retailResults.flatMap(
+      (result) => result.retail?.data || []
+    );
+    previousClients.forEach((client) => {
+      if (!equityHistory.has(client.userId)) {
+        equityHistory.set(client.userId, []);
+      }
+      equityHistory.get(client.userId)!.push({
+        equity: client.equity || 0,
+        timestamp: previousSnapshot.timestamp,
+      });
+    });
+  }
+
+  // Add historical equity from snapshots (avoid duplicates with previousSnapshot)
+  const allHistoricalSnapshots = [...safeSnapshots7d, ...safeSnapshots30d].filter(
+    (snapshot) => !previousSnapshot || snapshot.id !== previousSnapshot.id
+  );
+  
+  allHistoricalSnapshots.forEach((snapshot) => {
     const clients = snapshot.retailResults.flatMap((result) => result.retail?.data || []);
     clients.forEach((client) => {
       if (!equityHistory.has(client.userId)) {
@@ -98,15 +119,27 @@ export function calculateWithdrawalIntelligence(
     // Find equity at different time points
     const currentEquity = client.equity || 0;
     
+    // Use previous snapshot equity if available (most accurate comparison)
+    let previousEquity = currentEquity;
+    if (previousSnapshot) {
+      const previousClients = previousSnapshot.retailResults.flatMap(
+        (result) => result.retail?.data || []
+      );
+      const previousClient = previousClients.find((c) => c.userId === client.userId);
+      if (previousClient) {
+        previousEquity = previousClient.equity || 0;
+      }
+    }
+    
     // Find equity 7 days ago (closest snapshot before 7 days ago)
     const equity7dAgo = history
-      .filter((h) => h.timestamp <= sevenDaysAgo)
-      .sort((a, b) => b.timestamp - a.timestamp)[0]?.equity || currentEquity;
+      .filter((h) => h.timestamp <= sevenDaysAgo && h.timestamp < currentSnapshot.timestamp)
+      .sort((a, b) => b.timestamp - a.timestamp)[0]?.equity || previousEquity;
     
     // Find equity 30 days ago
     const equity30dAgo = history
-      .filter((h) => h.timestamp <= thirtyDaysAgo)
-      .sort((a, b) => b.timestamp - a.timestamp)[0]?.equity || currentEquity;
+      .filter((h) => h.timestamp <= thirtyDaysAgo && h.timestamp < currentSnapshot.timestamp)
+      .sort((a, b) => b.timestamp - a.timestamp)[0]?.equity || previousEquity;
 
     // Find peak equity in the period
     const peakEquityEntry = history.reduce(
@@ -117,16 +150,34 @@ export function calculateWithdrawalIntelligence(
     const peakEquityDate = peakEquityEntry.timestamp;
 
     // Calculate withdrawals (only if equity decreased)
+    // Use previousEquity for most recent comparison if available
     const withdrawalAmount7d = Math.max(0, equity7dAgo - currentEquity);
     const withdrawalAmount30d = Math.max(0, equity30dAgo - currentEquity);
+    
+    // Also calculate withdrawal from previous snapshot if available (most accurate)
+    const withdrawalFromPrevious = previousEquity > currentEquity 
+      ? previousEquity - currentEquity 
+      : 0;
+    const withdrawalPctFromPrevious = previousEquity > 0 
+      ? (withdrawalFromPrevious / previousEquity) * 100 
+      : 0;
     
     const withdrawalPct7d = equity7dAgo > 0 ? (withdrawalAmount7d / equity7dAgo) * 100 : 0;
     const withdrawalPct30d = equity30dAgo > 0 ? (withdrawalAmount30d / equity30dAgo) * 100 : 0;
 
-    // Determine alert levels
+    // Determine alert levels - use previous snapshot if available, otherwise use 30d
     const alertLevel7d = getAlertLevel(withdrawalPct7d, currentEquity, equity7dAgo);
     const alertLevel30d = getAlertLevel(withdrawalPct30d, currentEquity, equity30dAgo);
-    const alertLevel = alertLevel30d; // Use 30d as primary alert
+    
+    // Use previous snapshot alert level if available and significant, otherwise use 30d
+    const alertLevelFromPrevious = previousSnapshot 
+      ? getAlertLevel(withdrawalPctFromPrevious, currentEquity, previousEquity)
+      : "none";
+    
+    // Primary alert: use previous snapshot if it's critical/warning/emptied, otherwise use 30d
+    const alertLevel = (alertLevelFromPrevious !== "none" && previousSnapshot)
+      ? alertLevelFromPrevious
+      : alertLevel30d;
 
     // Find last withdrawal date (when equity decreased significantly)
     let lastWithdrawalDate: number | null = null;
@@ -148,7 +199,7 @@ export function calculateWithdrawalIntelligence(
       name: client.name || `User ${client.userId}`,
       tradingAccountLogin,
       currentEquity,
-      previousEquity: equity30dAgo,
+      previousEquity: previousEquity, // Use most recent previous equity
       withdrawalAmount7d,
       withdrawalAmount30d,
       withdrawalPct7d,

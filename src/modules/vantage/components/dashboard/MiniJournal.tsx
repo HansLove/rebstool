@@ -1,14 +1,13 @@
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isToday, isSameMonth, subMonths, addMonths } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { MdChevronLeft, MdChevronRight, MdExpandMore, MdExpandLess } from "react-icons/md";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { useJournalData } from "@/pages/journal/hooks/useJournalData";
 import { splitDecimals } from "@/core/utils/splitDecimals";
 
 export default function MiniJournal() {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [isExpanded, setIsExpanded] = useState(false);
   const { dailyData, monthlyTotals, isLoading } = useJournalData(currentMonth);
 
   const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 0 });
@@ -41,10 +40,6 @@ export default function MiniJournal() {
 
   const dayHeaders = ["S", "M", "T", "W", "T", "F", "S"];
 
-  const handleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
   const handleViewFull = () => {
     navigate("/journal");
   };
@@ -57,115 +52,64 @@ export default function MiniJournal() {
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
             Journal
           </h3>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {format(currentMonth, "MMM yyyy")}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleExpand}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-            title={isExpanded ? "Collapse" : "Expand"}
-          >
-            {isExpanded ? (
-              <MdExpandLess className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            ) : (
-              <MdExpandMore className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            )}
-          </button>
         </div>
       </div>
 
-      {/* Monthly Summary - Compact */}
-      {!isExpanded && (
-        <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
-          <div className="text-gray-600 dark:text-gray-400">
-            <span className="font-medium">Equity:</span>{" "}
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              ${splitDecimals(monthlyTotals.totalEquity.toFixed(0))}
-            </span>
-          </div>
-          <div className="text-gray-600 dark:text-gray-400">
-            <span className="font-medium">Deposits:</span>{" "}
-            <span className="text-blue-600 dark:text-blue-400 font-semibold">
-              ${splitDecimals(monthlyTotals.totalDeposits.toFixed(0))}
-            </span>
-          </div>
-          <div className="text-gray-600 dark:text-gray-400">
-            <span className="font-medium">New Users:</span>{" "}
-            <span className="text-purple-600 dark:text-purple-400 font-semibold">
-              {monthlyTotals.newUsers}
-            </span>
-          </div>
-          <div className="text-gray-600 dark:text-gray-400">
-            <span className="font-medium">Volume:</span>{" "}
-            <span className="text-orange-600 dark:text-orange-400 font-semibold">
-              {splitDecimals(monthlyTotals.totalVolume.toFixed(1))}
-            </span>
-          </div>
+      {/* Monthly Summary Cards */}
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-2 border border-emerald-200 dark:border-emerald-800">
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">
+            Total Equity
+          </p>
+          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+            ${splitDecimals(monthlyTotals.totalEquity.toFixed(2))}
+          </p>
         </div>
-      )}
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 border border-blue-200 dark:border-blue-800">
+          <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
+            Total Deposits
+          </p>
+          <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
+            ${splitDecimals(monthlyTotals.totalDeposits.toFixed(2))}
+          </p>
+        </div>
+        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-2 border border-purple-200 dark:border-purple-800">
+          <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">
+            New Users
+          </p>
+          <p className="text-sm font-bold text-purple-700 dark:text-purple-300">
+            {monthlyTotals.newUsers}
+          </p>
+        </div>
+        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2 border border-orange-200 dark:border-orange-800">
+          <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-1">
+            Trading Volume
+          </p>
+          <p className="text-sm font-bold text-orange-700 dark:text-orange-300">
+            {splitDecimals(monthlyTotals.totalVolume.toFixed(2))}
+          </p>
+        </div>
+      </div>
 
-      {/* Expanded View */}
-      {isExpanded && (
-        <>
-          {/* Monthly Summary Cards */}
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-2 border border-emerald-200 dark:border-emerald-800">
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">
-                Total Equity
-              </p>
-              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                ${splitDecimals(monthlyTotals.totalEquity.toFixed(2))}
-              </p>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 border border-blue-200 dark:border-blue-800">
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
-                Total Deposits
-              </p>
-              <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
-                ${splitDecimals(monthlyTotals.totalDeposits.toFixed(2))}
-              </p>
-            </div>
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-2 border border-purple-200 dark:border-purple-800">
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">
-                New Users
-              </p>
-              <p className="text-sm font-bold text-purple-700 dark:text-purple-300">
-                {monthlyTotals.newUsers}
-              </p>
-            </div>
-            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2 border border-orange-200 dark:border-orange-800">
-              <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-1">
-                Trading Volume
-              </p>
-              <p className="text-sm font-bold text-orange-700 dark:text-orange-300">
-                {splitDecimals(monthlyTotals.totalVolume.toFixed(2))}
-              </p>
-            </div>
-          </div>
-
-          {/* Calendar Navigation */}
-          <div className="flex items-center justify-between mb-2">
-            <button
-              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-            >
-              <MdChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            </button>
-            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-              {format(currentMonth, "MMMM yyyy")}
-            </h4>
-            <button
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              disabled={isSameMonth(currentMonth, new Date())}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <MdChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            </button>
-          </div>
-        </>
-      )}
+      {/* Calendar Navigation */}
+      <div className="flex items-center justify-between mb-2">
+        <button
+          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+        >
+          <MdChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+        </button>
+        <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+          {format(currentMonth, "MMMM yyyy")}
+        </h4>
+        <button
+          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+          disabled={isSameMonth(currentMonth, new Date())}
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <MdChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+        </button>
+      </div>
 
       {/* Calendar Grid */}
       {!isLoading ? (
@@ -253,14 +197,12 @@ export default function MiniJournal() {
       )}
 
       {/* View Full Button */}
-      {isExpanded && (
-        <button
-          onClick={handleViewFull}
-          className="w-full mt-3 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800"
-        >
-          View Full Journal →
-        </button>
-      )}
+      <button
+        onClick={handleViewFull}
+        className="w-full mt-3 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800"
+      >
+        View Full Journal →
+      </button>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useVantageScraper } from "../hooks/useVantageScraper";
 import WithdrawalIntelligence from "../components/dashboard/WithdrawalIntelligence";
 import useAuth from "@/core/hooks/useAuth";
@@ -13,9 +14,24 @@ export default function WithdrawalIntelligencePage() {
 
   const {
     currentSnapshot,
-    snapshots7d,
-    snapshots30d,
+    previousSnapshot,
+    snapshots,
   } = useVantageScraper();
+
+  // Calculate snapshots7d and snapshots30d from snapshots array
+  const snapshots7d = useMemo(() => {
+    if (!currentSnapshot) return [];
+    const now = Date.now();
+    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+    return snapshots.filter((s) => s.timestamp >= sevenDaysAgo && s.id !== currentSnapshot.id);
+  }, [snapshots, currentSnapshot]);
+
+  const snapshots30d = useMemo(() => {
+    if (!currentSnapshot) return [];
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    return snapshots.filter((s) => s.timestamp >= thirtyDaysAgo && s.id !== currentSnapshot.id);
+  }, [snapshots, currentSnapshot]);
 
   const handleUserClick = (userId: number) => {
     if (!currentSnapshot) return;
@@ -53,6 +69,7 @@ export default function WithdrawalIntelligencePage() {
     <div className="w-full max-w-[1800px] mx-auto px-2 lg:px-3 py-4">
       <WithdrawalIntelligence
         currentSnapshot={currentSnapshot}
+        previousSnapshot={previousSnapshot}
         snapshots7d={snapshots7d}
         snapshots30d={snapshots30d}
         onUserClick={handleUserClick}

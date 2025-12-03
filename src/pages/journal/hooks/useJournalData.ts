@@ -20,6 +20,7 @@ export interface DayData {
 export interface MonthlyTotals {
   totalEquity: number;
   totalDeposits: number;
+  totalDepositCount: number;
   totalVolume: number;
   newUsers: number;
   activeDays: number;
@@ -241,6 +242,7 @@ export function useJournalData(selectedMonth: Date) {
       (totals, day) => {
         totals.totalEquity += day.totalEquity;
         totals.totalDeposits += day.totalDeposits;
+        totals.totalDepositCount += day.deposits.length;
         totals.totalVolume += day.totalVolume;
         totals.newUsers += day.newUsers.length;
         if (
@@ -255,6 +257,7 @@ export function useJournalData(selectedMonth: Date) {
       {
         totalEquity: 0,
         totalDeposits: 0,
+        totalDepositCount: 0,
         totalVolume: 0,
         newUsers: 0,
         activeDays: 0,
