@@ -1,15 +1,21 @@
 import { useMemo } from "react";
-import { Calendar, Clock, TrendingUp, TrendingDown, Users } from "lucide-react";
+import { Calendar, Clock, TrendingUp, TrendingDown, Users, RotateCcw, GitCompare } from "lucide-react";
 import type { VantageSnapshot } from "../../types";
 
 interface SnapshotTimelineProps {
   snapshots: VantageSnapshot[];
   currentSnapshot: VantageSnapshot | null;
+  previousSnapshot: VantageSnapshot | null;
+  onSnapshotSelect?: (snapshotId: string) => void;
+  onResetToLatest?: () => void;
 }
 
 export default function SnapshotTimeline({
   snapshots,
   currentSnapshot,
+  previousSnapshot,
+  onSnapshotSelect,
+  onResetToLatest,
 }: SnapshotTimelineProps) {
   // Group snapshots by date
   const groupedSnapshots = useMemo(() => {
@@ -103,14 +109,26 @@ export default function SnapshotTimeline({
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          Snapshot Timeline
-        </h2>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          ({snapshots.length} total)
-        </span>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Snapshot Timeline
+          </h2>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            ({snapshots.length} total)
+          </span>
+        </div>
+        {previousSnapshot && previousSnapshot.id !== snapshots[1]?.id && onResetToLatest && (
+          <button
+            onClick={onResetToLatest}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            title="Reset to latest comparison"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset to Latest
+          </button>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -143,14 +161,24 @@ export default function SnapshotTimeline({
                     : null;
                   const change = prevSnapshot ? calculateChange(prevSnapshot, snapshot) : null;
 
+                  const isSelected = previousSnapshot?.id === snapshot.id;
+                  const canSelect = !isCurrent && onSnapshotSelect;
+
                   return (
                     <div
                       key={snapshot.id}
-                      className={`rounded-lg border p-4 ${
+                      className={`rounded-lg border p-4 transition-all ${
                         isCurrent
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                          : isSelected
+                          ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
                           : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50"
+                      } ${
+                        canSelect
+                          ? "cursor-pointer hover:border-blue-400 hover:shadow-md"
+                          : ""
                       }`}
+                      onClick={() => canSelect && onSnapshotSelect?.(snapshot.id)}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -161,6 +189,17 @@ export default function SnapshotTimeline({
                           {isCurrent && (
                             <span className="text-xs px-2 py-0.5 bg-blue-500 text-white rounded">
                               Current
+                            </span>
+                          )}
+                          {isSelected && (
+                            <span className="text-xs px-2 py-0.5 bg-purple-500 text-white rounded flex items-center gap-1">
+                              <GitCompare className="h-3 w-3" />
+                              Comparing
+                            </span>
+                          )}
+                          {canSelect && !isCurrent && !isSelected && (
+                            <span className="text-xs px-2 py-0.5 bg-gray-400 dark:bg-gray-600 text-white rounded">
+                              Click to compare
                             </span>
                           )}
                         </div>

@@ -27,6 +27,8 @@ interface UseVantageScraperReturn {
   // Actions
   runScraper: (credentials?: VantageCredentials) => Promise<void>;
   clearSnapshots: () => void;
+  selectSnapshotForComparison: (snapshotId: string) => Promise<void>;
+  resetToLatest: () => void;
 
   // Status
   lastExecutionTime: number | null;
@@ -173,6 +175,75 @@ export function useVantageScraper(): UseVantageScraperReturn {
     toast.success("Snapshots cleared from view", { duration: 3000 });
   }, [queryClient]);
 
+  // Select a snapshot for comparison with the latest
+  const selectSnapshotForComparison = useCallback(async (snapshotId: string) => {
+    if (!snapshotsData?.snapshots) return;
+    
+    const latestSummary = snapshotsData.snapshots[0];
+    const selectedSummary = snapshotsData.snapshots.find((s) => s.id === snapshotId);
+    
+    if (!selectedSummary || !latestSummary) {
+      toast.error("Snapshot not found", { duration: 3000 });
+      return;
+    }
+
+    if (selectedSummary.id === latestSummary.id) {
+      toast.error("Cannot compare snapshot with itself", { duration: 3000 });
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      // Fetch full snapshots with clients
+      const [latestFull, selectedFull] = await Promise.all([
+        fetchSnapshotById(latestSummary.id, true, 10000),
+        fetchSnapshotById(selectedSummary.id, true, 10000),
+      ]);
+
+      setCurrentSnapshot(latestFull);
+      setPreviousSnapshot(selectedFull);
+      
+      // Compare: selected snapshot (older) vs latest (newer)
+      const comparison = compareSnapshots(selectedFull, latestFull);
+      setComparisonResult(comparison);
+      
+      toast.success(`Comparing with snapshot from ${new Date(selectedFull.timestamp).toLocaleString()}`, {
+        duration: 4000,
+      });
+    } catch (err) {
+      console.error("Error loading snapshots for comparison:", err);
+      setError(err as Error);
+      toast.error("Failed to load snapshot for comparison", { duration: 4000 });
+    }
+  }, [snapshotsData]);
+
+  // Reset to latest comparison (automatic)
+  const resetToLatest = useCallback(async () => {
+    if (snapshotsData?.snapshots && snapshotsData.snapshots.length > 0) {
+      const latestSummary = snapshotsData.snapshots[0];
+      const previousSummary = snapshotsData.snapshots[1] || null;
+
+      try {
+        const latestFull = await fetchSnapshotById(latestSummary.id, true, 10000);
+        setCurrentSnapshot(latestFull);
+
+        if (previousSummary) {
+          const previousFull = await fetchSnapshotById(previousSummary.id, true, 10000);
+          setPreviousSnapshot(previousFull);
+          const comparison = compareSnapshots(previousFull, latestFull);
+          setComparisonResult(comparison);
+        } else {
+          setPreviousSnapshot(null);
+          setComparisonResult(null);
+        }
+      } catch (err) {
+        console.error("Error resetting to latest:", err);
+        setError(err as Error);
+      }
+    }
+  }, [snapshotsData]);
+
   // Get snapshots list from API data
   const snapshots = useMemo(() => {
     return snapshotsData?.snapshots || [];
@@ -206,6 +277,8 @@ export function useVantageScraper(): UseVantageScraperReturn {
     error: displayError,
     runScraper,
     clearSnapshots,
+    selectSnapshotForComparison,
+    resetToLatest,
     lastExecutionTime,
     hasChanges,
   };
