@@ -30,10 +30,60 @@ function App() {
     }),
   });
 
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        refetchOnWindowFocus: false,
+      },
+    },
+  });
 
   // State for dark mode
   const [isDarkMode, setIsDarkMode] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  // Suppress Coinbase Analytics SDK errors (harmless network failures)
+  useEffect(() => {
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    console.error = (...args: unknown[]) => {
+      const message = args[0]?.toString() || '';
+      const stack = args[1]?.toString() || '';
+      const fullMessage = `${message} ${stack}`;
+      
+      // Suppress Coinbase Analytics SDK errors specifically
+      if (
+        fullMessage.includes('Analytics SDK') ||
+        (fullMessage.includes('Failed to fetch') && fullMessage.includes('coinbase.com')) ||
+        fullMessage.includes('AnalyticsSDKApiError') ||
+        fullMessage.includes('cca-lite.coinbase.com')
+      ) {
+        return; // Suppress these errors
+      }
+      originalError.apply(console, args);
+    };
+
+    console.warn = (...args: unknown[]) => {
+      const message = args[0]?.toString() || '';
+      const stack = args[1]?.toString() || '';
+      const fullMessage = `${message} ${stack}`;
+      
+      // Suppress Coinbase Analytics SDK warnings specifically
+      if (
+        fullMessage.includes('Analytics SDK') ||
+        fullMessage.includes('cca-lite.coinbase.com')
+      ) {
+        return; // Suppress these warnings
+      }
+      originalWarn.apply(console, args);
+    };
+
+    return () => {
+      console.error = originalError;
+      console.warn = originalWarn;
+    };
+  }, []);
 
   // Listen for theme changes
   useEffect(() => {

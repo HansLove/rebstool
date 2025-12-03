@@ -109,7 +109,18 @@ export function extractAllRetailClients(snapshot: VantageSnapshot): RetailClient
     });
   }
 
-  return clients;
+  // Deduplicate clients by userId to prevent duplicate keys in React
+  // If a client appears multiple times, keep the first occurrence
+  const seenUserIds = new Set<number>();
+  const uniqueClients: RetailClient[] = [];
+  for (const client of clients) {
+    if (!seenUserIds.has(client.userId)) {
+      seenUserIds.add(client.userId);
+      uniqueClients.push(client);
+    }
+  }
+
+  return uniqueClients;
 }
 
 /**

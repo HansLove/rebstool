@@ -1,6 +1,6 @@
 import { FaCalendarWeek } from "react-icons/fa6";
 import { MdDashboard } from "react-icons/md";
-import { TrendingDown, TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
+import { TrendingDown, TrendingUp, BarChart3, DollarSign, Users, Building2 } from "lucide-react";
 
 // Menú simplificado para RebTools - Dashboard (Vantage Scraper) y módulos de inteligencia
 export const simpleMenuLinks = [
@@ -38,6 +38,12 @@ export const simpleMenuLinks = [
     label: "Deposit Intelligence",
     href: "/deposit-intelligence",
     icon: <DollarSign className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
+  },
+  {
+    label: "Sub-IB Analytics",
+    href: "/sub-ib-analytics",
+    icon: <Building2 className="h-5 w-5 shrink-0" />,
     adminOnly: true,
   },
   {

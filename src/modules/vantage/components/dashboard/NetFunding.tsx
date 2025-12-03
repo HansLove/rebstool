@@ -38,6 +38,25 @@ export default function NetFunding({
 
   const { topNetFunders, topNetWithdrawers, totalCommunityNetFunding } = netFundingData;
 
+  // Ensure unique userIds in lists to prevent duplicate keys (defensive check)
+  const uniqueTopNetFunders = useMemo(() => {
+    const seen = new Set<number>();
+    return topNetFunders.filter((user) => {
+      if (seen.has(user.userId)) return false;
+      seen.add(user.userId);
+      return true;
+    });
+  }, [topNetFunders]);
+
+  const uniqueTopNetWithdrawers = useMemo(() => {
+    const seen = new Set<number>();
+    return topNetWithdrawers.filter((user) => {
+      if (seen.has(user.userId)) return false;
+      seen.add(user.userId);
+      return true;
+    });
+  }, [topNetWithdrawers]);
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
       <div className="flex items-center gap-2 mb-6">
@@ -91,8 +110,8 @@ export default function NetFunding({
             </h3>
           </div>
           <div className="space-y-2">
-            {topNetFunders.length > 0 ? (
-              topNetFunders.slice(0, 10).map((user, index) => (
+            {uniqueTopNetFunders.length > 0 ? (
+              uniqueTopNetFunders.slice(0, 10).map((user, index) => (
                 <div
                   key={user.userId}
                   className="border border-green-200 dark:border-green-800 rounded-lg p-3 hover:bg-green-50 dark:hover:bg-green-900/10 cursor-pointer transition-colors"
@@ -140,8 +159,8 @@ export default function NetFunding({
             </h3>
           </div>
           <div className="space-y-2">
-            {topNetWithdrawers.length > 0 ? (
-              topNetWithdrawers.slice(0, 10).map((user, index) => (
+            {uniqueTopNetWithdrawers.length > 0 ? (
+              uniqueTopNetWithdrawers.slice(0, 10).map((user, index) => (
                 <div
                   key={user.userId}
                   className="border border-red-200 dark:border-red-800 rounded-lg p-3 hover:bg-red-50 dark:hover:bg-red-900/10 cursor-pointer transition-colors"

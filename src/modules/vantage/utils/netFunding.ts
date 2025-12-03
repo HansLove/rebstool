@@ -98,7 +98,7 @@ export function calculateNetFunding(
   });
 
   // Calculate net funding for each user
-  const netFundingByUser: NetFundingMetrics[] = currentClients.map((client) => {
+  const netFundingByUserRaw: NetFundingMetrics[] = currentClients.map((client) => {
     const deposits = depositHistory.get(client.userId) || [];
     const account = accountsMap.get(client.userId);
 
@@ -174,6 +174,16 @@ export function calculateNetFunding(
       lastWithdrawalTime,
     };
   });
+
+  // Deduplicate by userId - if same user appears multiple times, keep the one with highest netFunding
+  const userIdMap = new Map<number, NetFundingMetrics>();
+  netFundingByUserRaw.forEach((user) => {
+    const existing = userIdMap.get(user.userId);
+    if (!existing || Math.abs(user.netFunding) > Math.abs(existing.netFunding)) {
+      userIdMap.set(user.userId, user);
+    }
+  });
+  const netFundingByUser = Array.from(userIdMap.values());
 
   // Calculate total community net funding
   const totalCommunityNetFunding = netFundingByUser.reduce(

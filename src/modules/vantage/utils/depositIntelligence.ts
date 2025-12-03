@@ -91,7 +91,7 @@ export function analyzeDeposits(
   });
 
   // Calculate deposit metrics for each user
-  const deposits: DepositMetrics[] = currentClients.map((client) => {
+  const depositsRaw: DepositMetrics[] = currentClients.map((client) => {
     const history = depositHistory.get(client.userId) || [];
     const account = accountsMap.get(client.userId);
     
@@ -137,6 +137,16 @@ export function analyzeDeposits(
       currentBalance: client.accountBalance || 0,
     };
   });
+
+  // Deduplicate by userId - if same user appears multiple times, keep the one with highest totalDeposits
+  const userIdMap = new Map<number, DepositMetrics>();
+  depositsRaw.forEach((deposit) => {
+    const existing = userIdMap.get(deposit.userId);
+    if (!existing || deposit.totalDeposits > existing.totalDeposits) {
+      userIdMap.set(deposit.userId, deposit);
+    }
+  });
+  const deposits = Array.from(userIdMap.values());
 
   // Create top lists
   const topDepositors = deposits

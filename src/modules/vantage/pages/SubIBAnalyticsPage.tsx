@@ -146,12 +146,11 @@ export default function SubIBAnalyticsPage() {
         )}
       </div>
 
-      {/* Performance Charts */}
+      {/* Performance Chart - Top Sub-IBs Comparison */}
       <div className="mb-6">
         <SubIBPerformanceCharts
           snapshots={filteredSnapshots}
           selectedSubIB={selectedSubIB}
-          timeRange={timeRange}
           isLoading={isLoading}
         />
       </div>
