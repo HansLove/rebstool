@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { fetchSnapshots } from "@/modules/vantage/services/vantageScraperService";
@@ -15,9 +16,11 @@ export interface DayData {
   totalVolume: number;
 }
 
+
 export interface MonthlyTotals {
   totalEquity: number;
   totalDeposits: number;
+  totalDepositCount: number;
   totalVolume: number;
   newUsers: number;
   activeDays: number;
@@ -51,14 +54,9 @@ export function useJournalData(selectedMonth: Date) {
       while (hasMore && page <= 10) {
         // Limit to 10 pages to avoid infinite loops
         const response = await fetchSnapshots(page, limit);
-        allSnapshots.push(...response.snapshots);
+        allSnapshots.push(...(response.snapshots as []));
 
-        // Check if we have snapshots within the month range
-        const snapshotsInRange = response.snapshots.filter(
-          (snapshot) =>
-            snapshot.timestamp >= monthStart.getTime() &&
-            snapshot.timestamp <= monthEnd.getTime()
-        );
+       
 
         // If we got fewer than limit, we're done
         if (response.snapshots.length < limit) {
@@ -75,7 +73,7 @@ export function useJournalData(selectedMonth: Date) {
       }
 
       return allSnapshots.filter(
-        (snapshot) =>
+        (snapshot: any) =>
           snapshot.timestamp >= monthStart.getTime() &&
           snapshot.timestamp <= monthEnd.getTime()
       );
@@ -92,7 +90,7 @@ export function useJournalData(selectedMonth: Date) {
 
     // Get all retail clients from all snapshots
     const allClients: RetailClient[] = [];
-    snapshotsData.forEach((snapshot) => {
+    snapshotsData.forEach((snapshot: any) => {
       snapshot.retailResults.forEach((result) => {
         allClients.push(...result.retail.data);
       });
@@ -244,6 +242,7 @@ export function useJournalData(selectedMonth: Date) {
       (totals, day) => {
         totals.totalEquity += day.totalEquity;
         totals.totalDeposits += day.totalDeposits;
+        totals.totalDepositCount += day.deposits.length;
         totals.totalVolume += day.totalVolume;
         totals.newUsers += day.newUsers.length;
         if (
@@ -258,12 +257,13 @@ export function useJournalData(selectedMonth: Date) {
       {
         totalEquity: 0,
         totalDeposits: 0,
+        totalDepositCount: 0,
         totalVolume: 0,
         newUsers: 0,
         activeDays: 0,
         totalClients: snapshotsData
           ? snapshotsData.reduce(
-              (sum, s) => sum + s.metadata.totalRetailClients,
+              (sum, s: any) => sum + s.metadata.totalRetailClients,
               0
             )
           : 0,

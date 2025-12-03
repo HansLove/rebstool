@@ -18,7 +18,7 @@ import { useParams } from "react-router-dom";
 import CountdownTimer from "@/components/storytime/CountdownTimer";
 import EventCounter from "@/components/storytime/EventCounter";
 import PayoutShowcase from "@/components/storytime/PayoutShowcase";
-import GiveawayBanner from "@/components/storytime/GiveawayBanner";
+// import GiveawayBanner from "@/components/storytime/GiveawayBanner";
 
 // Types
 interface PartnerConfig {
@@ -172,7 +172,7 @@ const PartnerLandingPage: FC = () => {
         {/* Partner Info Card */}
         <div className="relative z-10 bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-linear-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center">
               <span className="text-2xl font-bold text-black">
                 {partnerConfig.name.charAt(0)}
               </span>
@@ -215,15 +215,7 @@ const PartnerLandingPage: FC = () => {
             />
           )}
 
-          {/* Giveaway Banner */}
-          {partnerConfig.giveaway && (
-            <GiveawayBanner
-              title={partnerConfig.giveaway.title}
-              description={partnerConfig.giveaway.description}
-              prize={partnerConfig.giveaway.prize}
-              endTime={partnerConfig.giveaway.endTime}
-            />
-          )}
+         
 
           {/* Payout Showcase */}
           <PayoutShowcase

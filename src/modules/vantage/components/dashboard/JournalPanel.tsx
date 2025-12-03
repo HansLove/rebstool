@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, subMonths, addMonths, isToday, isSameMonth } from "date-fns";
-import { MdChevronLeft, MdChevronRight, MdAttachMoney, MdAccountBalance, MdPeople, MdTrendingUp } from "react-icons/md";
+import { MdChevronLeft, MdChevronRight} from "react-icons/md";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useJournalData } from "@/pages/journal/hooks/useJournalData";
 import { splitDecimals } from "@/core/utils/splitDecimals";

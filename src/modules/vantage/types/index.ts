@@ -226,3 +226,57 @@ export interface SnapshotByIdResponse {
   message?: string;
 }
 
+// Clients pagination response
+export interface SnapshotClientsResponse {
+  success: boolean;
+  data: {
+    snapshot_id: string;
+    clients: VantageRetailClientApi[];
+    pagination: PaginationInfo;
+  };
+  message?: string;
+}
+
+// Analytics response
+export interface SnapshotAnalyticsResponse {
+  success: boolean;
+  data: {
+    snapshot_id: string;
+    snapshot: {
+      id: string;
+      timestamp: number;
+      scraped_at: string;
+      total_accounts: number;
+      total_retail_clients: number;
+    };
+    analytics: {
+      total_clients: number;
+      total_balance: number;
+      total_profit: number;
+      average_balance: number;
+      average_profit: number;
+      clients_by_platform: Record<string, number>;
+      clients_by_account_type: Record<string, number>;
+      clients_by_currency: Record<string, number>;
+      deposit_stats: {
+        total_deposits: number;
+        average_deposit: number;
+        deposit_count: number;
+      };
+      top_clients_by_balance: Array<{
+        id: number;
+        name: string;
+        accountNmber: number;
+        accountBalance: number;
+      }>;
+      top_clients_by_profit: Array<{
+        id: number;
+        name: string;
+        accountNmber: number;
+        profit: number;
+      }>;
+    };
+  };
+  message?: string;
+}
+

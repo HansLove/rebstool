@@ -1,12 +1,44 @@
 import { FaCalendarWeek } from "react-icons/fa6";
 import { MdDashboard } from "react-icons/md";
+import { TrendingDown, TrendingUp, BarChart3, DollarSign, Users } from "lucide-react";
 
-// Menú simplificado para RebTools - Solo Dashboard (Vantage Scraper) y Journal
+// Menú simplificado para RebTools - Dashboard (Vantage Scraper) y módulos de inteligencia
 export const simpleMenuLinks = [
   {
     label: "Dashboard",
     href: "/dashboard",
     icon: <MdDashboard className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
+  },
+  {
+    label: "Traders Overview",
+    href: "/traders-overview",
+    icon: <Users className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
+  },
+  {
+    label: "Withdrawal Intelligence",
+    href: "/withdrawal-intelligence",
+    icon: <TrendingDown className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
+  },
+  {
+    label: "Volume Leaderboard",
+    href: "/volume-leaderboard",
+    icon: <TrendingUp className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
+  },
+  {
+    label: "Lots Analyzer",
+    href: "/lots-analyzer",
+    icon: <BarChart3 className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
+  },
+  {
+    label: "Deposit Intelligence",
+    href: "/deposit-intelligence",
+    icon: <DollarSign className="h-5 w-5 shrink-0" />,
+    adminOnly: true,
   },
   {
     label: "Journal",

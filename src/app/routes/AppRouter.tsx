@@ -15,6 +15,11 @@ import useAuth from "@/core/hooks/useAuth";
 // Lazy-Loaded
 const LandingPage = lazy(() => import("../../pages/landingPage/LandingPage"));
 const VantageScraperPage = lazy(() => import("@/modules/vantage/pages/VantageScraperPage"));
+const TradersOverviewPage = lazy(() => import("@/modules/vantage/pages/TradersOverviewPage"));
+const WithdrawalIntelligencePage = lazy(() => import("@/modules/vantage/pages/WithdrawalIntelligencePage"));
+const VolumeLeaderboardPage = lazy(() => import("@/modules/vantage/pages/VolumeLeaderboardPage"));
+const LotsAnalyzerPage = lazy(() => import("@/modules/vantage/pages/LotsAnalyzerPage"));
+const DepositIntelligencePage = lazy(() => import("@/modules/vantage/pages/DepositIntelligencePage"));
 const Journal = lazy(() => import("../../pages/journal/Journal"));
 
 export default function AppRouter(): JSX.Element {
@@ -65,6 +70,11 @@ export default function AppRouter(): JSX.Element {
       >
         <Route element={<SimpleLayout />}>
           <Route path="dashboard" element={withSuspense(VantageScraperPage)} />
+          <Route path="traders-overview" element={withSuspense(TradersOverviewPage)} />
+          <Route path="withdrawal-intelligence" element={withSuspense(WithdrawalIntelligencePage)} />
+          <Route path="volume-leaderboard" element={withSuspense(VolumeLeaderboardPage)} />
+          <Route path="lots-analyzer" element={withSuspense(LotsAnalyzerPage)} />
+          <Route path="deposit-intelligence" element={withSuspense(DepositIntelligencePage)} />
           <Route path="journal" element={withSuspense(Journal)} />
         </Route>
       </Route>

@@ -1,4 +1,4 @@
-import { MessageCircle, Phone } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { getWhatsAppUrl } from "../../utils/phoneFormatter";
 import type { RetailClient } from "../../types";
 

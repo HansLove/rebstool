@@ -96,25 +96,28 @@ export default function Journal() {
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
                   Total Equity
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                  ${splitDecimals(monthlyTotals.totalEquity.toFixed(2))}
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-600 dark:text-emerald-400">
+                  ${splitDecimals(monthlyTotals.totalEquity.toFixed(0))}
                 </p>
               </div>
-              <MdAttachMoney className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-500" />
+              <MdAttachMoney className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-500" />
             </div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
                   Total Deposits
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">
-                  ${splitDecimals(monthlyTotals.totalDeposits.toFixed(2))}
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400">
+                  {monthlyTotals.totalDepositCount}
+                </p>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  ${splitDecimals(monthlyTotals.totalDeposits.toFixed(0))}
                 </p>
               </div>
-              <MdAccountBalance className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+              <MdAccountBalance className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
             </div>
           </div>
 
@@ -124,11 +127,11 @@ export default function Journal() {
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
                   New Users
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-400">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600 dark:text-purple-400">
                   {monthlyTotals.newUsers}
                 </p>
               </div>
-              <MdPeople className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
+              <MdPeople className="w-8 h-8 sm:w-10 sm:h-10 text-purple-500" />
             </div>
           </div>
 
@@ -138,11 +141,11 @@ export default function Journal() {
                 <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
                   Trading Volume
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-orange-600 dark:text-orange-400">
-                  {splitDecimals(monthlyTotals.totalVolume.toFixed(2))}
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 dark:text-orange-400">
+                  {splitDecimals(monthlyTotals.totalVolume.toFixed(0))}
                 </p>
               </div>
-              <MdTrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+              <MdTrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
             </div>
           </div>
         </div>
@@ -218,7 +221,7 @@ export default function Journal() {
                   <div
                     key={day.toISOString()}
                     className={`
-                    relative rounded-lg sm:rounded-xl p-2 sm:p-3 lg:p-4 min-h-[80px] sm:min-h-[100px] lg:min-h-[120px]
+                    relative rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 min-h-[100px] sm:min-h-[130px] lg:min-h-[160px]
                     transition-all duration-200 hover:scale-105 hover:shadow-lg
                     ${
                       hasData
@@ -231,7 +234,7 @@ export default function Journal() {
                   >
                     {/* Date */}
                     <div
-                      className={`text-xs sm:text-sm font-semibold mb-1 sm:mb-2 ${
+                      className={`text-sm sm:text-base font-bold mb-2 sm:mb-3 ${
                         isCurrentDay
                           ? "text-yellow-600 dark:text-yellow-400"
                           : hasData
@@ -244,44 +247,63 @@ export default function Journal() {
 
                     {/* Data Content */}
                     {hasData ? (
-                      <div className="space-y-1 sm:space-y-2">
+                      <div className="space-y-2 sm:space-y-3">
+                        {/* Deposit Count - Most Prominent */}
+                        {dayDepositCount > 0 && (
+                          <div className="bg-blue-100 dark:bg-blue-900/40 rounded-lg p-2 border border-blue-300 dark:border-blue-700">
+                            <div className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
+                              Deposits
+                            </div>
+                            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400">
+                              {dayDepositCount}
+                            </div>
+                            {dayDeposits > 0 && (
+                              <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                ${splitDecimals(dayDeposits.toFixed(0))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Equity - Large */}
                         {dayEquity > 0 && (
-                          <div className="text-emerald-600 dark:text-emerald-400 font-bold text-xs sm:text-sm">
+                          <div className="text-emerald-600 dark:text-emerald-400 font-bold text-base sm:text-lg lg:text-xl">
                             ${splitDecimals(dayEquity.toFixed(0))}
                           </div>
                         )}
-                        {dayDeposits > 0 && (
-                          <div className="text-xs text-blue-600 dark:text-blue-300">
-                            Dep: ${splitDecimals(dayDeposits.toFixed(0))}
-                          </div>
-                        )}
-                        {dayVolume > 0 && (
-                          <div className="text-xs text-slate-600 dark:text-slate-300">
-                            Vol: {splitDecimals(dayVolume.toFixed(1))}
-                          </div>
-                        )}
+                        
+                        {/* New Users - Prominent */}
                         {dayNewUsers > 0 && (
-                          <div className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                            +{dayNewUsers} new{dayNewUsers !== 1 ? "" : ""}
+                          <div className="bg-purple-100 dark:bg-purple-900/40 rounded-lg p-1.5 sm:p-2 border border-purple-300 dark:border-purple-700">
+                            <div className="text-sm sm:text-base lg:text-lg font-bold text-purple-600 dark:text-purple-400">
+                              +{dayNewUsers} New
+                            </div>
                           </div>
                         )}
-                        {(dayDepositCount > 0 || dayTradeCount > 0) && (
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
-                            {dayDepositCount > 0 && `${dayDepositCount} dep`}
-                            {dayDepositCount > 0 && dayTradeCount > 0 && " • "}
-                            {dayTradeCount > 0 && `${dayTradeCount} trades`}
+                        
+                        {/* Volume */}
+                        {dayVolume > 0 && (
+                          <div className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium">
+                            Vol: {splitDecimals(dayVolume.toFixed(0))}
+                          </div>
+                        )}
+                        
+                        {/* Trade Count */}
+                        {dayTradeCount > 0 && (
+                          <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            {dayTradeCount} trade{dayTradeCount !== 1 ? "s" : ""}
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                      <div className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 mt-2">
                         {isCurrentMonthDay ? "No data" : ""}
                       </div>
                     )}
 
                     {/* Activity Indicator */}
                     {hasData && (
-                      <div className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                      <div className="absolute top-2 right-2 w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg"></div>
                     )}
                   </div>
                 );

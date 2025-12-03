@@ -2,8 +2,8 @@
 import { http } from "@/core/utils/http_request";
 
 // Re-export affiliate services from modules for backward compatibility
-export { createAffiliateService } from "@/modules/affiliates/services/affiliateService";
-export { createSubAffiliateService, verifyMailCode } from "@/modules/subAffiliates/services/subAffiliateService";
+// export { createAffiliateService } from "@/modules/affiliates/services/affiliateService";
+// export { createSubAffiliateService, verifyMailCode } from "@/modules/subAffiliates/services/subAffiliateService";
 
 
 export const saveVaultAddress = async ({

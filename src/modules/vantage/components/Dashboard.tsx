@@ -3,13 +3,17 @@ import { useVantageScraper } from "../hooks/useVantageScraper";
 import useAuth from "@/core/hooks/useAuth";
 import { RefreshCw, AlertCircle, Users, TrendingDown, DollarSign, Clock } from "lucide-react";
 import type { VantageCredentials, RetailClient, Account } from "../types";
-import { format } from "date-fns";
 import MetricCard from "./dashboard/MetricCard";
 import UserRow from "./dashboard/UserRow";
 import CentralSearch from "./dashboard/CentralSearch";
-import JournalPanel from "./dashboard/JournalPanel";
-import UserInfoCard from "./dashboard/UserInfoCard";
+import UserInfoModal from "./dashboard/UserInfoModal";
+import RebatesTable from "./dashboard/RebatesTable";
+import RebatesKPIs from "./dashboard/RebatesKPIs";
+import TopAtRiskUsers from "./dashboard/TopAtRiskUsers";
+import MiniJournal from "./dashboard/MiniJournal";
 import { useUserTabs } from "../context/UserTabsContext";
+import { getRebatesWithStatus, type RebateWithStatus } from "../utils/rebateStatus";
+import SnapshotTimeline from "./dashboard/SnapshotTimeline";
 
 export default function Dashboard() {
   const { getUser } = useAuth();
@@ -23,7 +27,7 @@ export default function Dashboard() {
     isLoading,
     error,
     runScraper,
-    lastExecutionTime,
+    snapshots,
   } = useVantageScraper();
 
   const [credentials] = useState<VantageCredentials>({
@@ -42,7 +46,7 @@ export default function Dashboard() {
   });
 
   // User tabs from context
-  const { addTab, getActiveTab } = useUserTabs();
+  const { addTab, getActiveTab, removeTab } = useUserTabs();
 
   // Calculate users who lost significant money (>$500 loss)
   const usersWhoLostMoney = useMemo(() => {
@@ -135,6 +139,27 @@ export default function Dashboard() {
     }
   }, [currentSnapshot, previousSnapshot]);
 
+  // Calculate rebates with status (must be before early return)
+  const rebatesWithStatus = useMemo(() => {
+    return getRebatesWithStatus(currentSnapshot, previousSnapshot);
+  }, [currentSnapshot, previousSnapshot]);
+
+  // Filter snapshots for 24h and 7d calculations
+  const snapshots24h = useMemo(() => {
+    if (!currentSnapshot) return [];
+    const now = Date.now();
+    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+    return snapshots.filter((s) => s.timestamp >= twentyFourHoursAgo);
+  }, [snapshots, currentSnapshot]);
+
+  const snapshots7d = useMemo(() => {
+    if (!currentSnapshot) return [];
+    const now = Date.now();
+    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+    return snapshots.filter((s) => s.timestamp >= sevenDaysAgo);
+  }, [snapshots, currentSnapshot]);
+
+
   if (!isAdmin) {
     return (
       <div className="w-full max-w-9xl mx-auto py-8 px-4 lg:px-6">
@@ -161,9 +186,16 @@ export default function Dashboard() {
     await runScraper(creds);
   };
 
-  const formatDate = (timestamp: number | null) => {
+  // Format date in London timezone
+  const formatDateLondon = (timestamp: number | null) => {
     if (!timestamp) return "N/A";
-    return format(new Date(timestamp), "PPpp");
+    const date = new Date(timestamp);
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
+      dateStyle: "medium",
+      timeStyle: "short",
+      hour12: false,
+    }).format(date);
   };
 
   // Find account for a user
@@ -181,17 +213,40 @@ export default function Dashboard() {
   // Get active tab
   const activeTab = getActiveTab();
 
+  // Handle rebate click - find associated user and open tab
+  const handleRebateClick = (rebate: RebateWithStatus) => {
+    if (!currentSnapshot) return;
+    
+    // Find the retail client associated with this rebate account
+    const allClients = currentSnapshot.retailResults.flatMap(
+      (result) => result.retail?.data || []
+    );
+    const associatedUser = allClients.find((client) => client.userId === rebate.userId);
+    
+    if (associatedUser) {
+      addTab(associatedUser, rebate);
+    }
+  };
+
+  // Handle modal close
+  const handleCloseModal = () => {
+    if (activeTab) {
+      const tabId = `user-${activeTab.user.userId}`;
+      removeTab(tabId);
+    }
+  };
+
   return (
     <div className="w-full max-w-[1800px] mx-auto px-2 lg:px-3">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm mb-3 -mx-2 lg:-mx-3 px-2 lg:px-3 py-2">
         <div className="flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            {/* <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Rebates Control Panel</h1> */}
             <div className="flex flex-wrap items-center gap-3 mt-1">
-              {lastExecutionTime && (
+              {currentSnapshot?.timestamp && (
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Last capture: {formatDate(lastExecutionTime)}
+                  Last capture: <span className="font-semibold text-gray-900 dark:text-white">{formatDateLondon(currentSnapshot.timestamp)}</span> (London)
                 </p>
               )}
               {timeDifference && (
@@ -228,115 +283,142 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Main Layout: 3 Value Cards + Central Search + Journal */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-        {/* Left Column: Value Pattern Cards */}
-        <div className={`space-y-3 ${activeTab ? "lg:col-span-7" : "lg:col-span-8"}`}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* 1. Disappeared Users */}
-            <MetricCard
-              title="Disappeared Users"
-              count={comparisonResult?.removedUsers?.length || 0}
-              icon={<Users className="h-5 w-5" />}
-              color="red"
-              isExpanded={expandedSections.disappeared}
-              onToggle={() => toggleSection("disappeared")}
-            >
-              {comparisonResult && comparisonResult.removedUsers.length > 0 ? (
-                <div className="space-y-2">
-                  {comparisonResult.removedUsers.map((user) => (
-                    <UserRow
-                      key={user.userId}
-                      user={user}
-                      metric={`Equity: ${formatCurrency(user.equity)}`}
-                      onClick={handleUserClick}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                  No users disappeared
-                </p>
-              )}
-            </MetricCard>
 
-            {/* 2. Users Who Lost Money */}
-            <MetricCard
-              title="Significant Losses"
-              count={usersWhoLostMoney.length}
-              icon={<TrendingDown className="h-5 w-5" />}
-              color="orange"
-              isExpanded={expandedSections.lostMoney}
-              onToggle={() => toggleSection("lostMoney")}
-            >
-              {usersWhoLostMoney.length > 0 ? (
-                <div className="space-y-2">
-                  {usersWhoLostMoney.map((user) => (
-                    <UserRow
-                      key={user.userId}
-                      user={user}
-                      metric={`Loss: ${formatCurrency(user.loss)}`}
-                      subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
-                      onClick={handleUserClick}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                  No significant losses detected
-                </p>
-              )}
-            </MetricCard>
+            {/* Central Search - Full Width */}
+            <div className="mb-3">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <CentralSearch currentSnapshot={currentSnapshot} onUserClick={handleUserClick} />
+        </div>
+      </div>
 
-            {/* 3. Critical Withdrawals */}
-            <MetricCard
-              title="Critical Withdrawals"
-              count={criticalWithdrawals.length}
-              icon={<DollarSign className="h-5 w-5" />}
-              color="purple"
-              isExpanded={expandedSections.withdrawals}
-              onToggle={() => toggleSection("withdrawals")}
-            >
-              {criticalWithdrawals.length > 0 ? (
-                <div className="space-y-2">
-                  {criticalWithdrawals.map((user) => (
-                    <UserRow
-                      key={user.userId}
-                      user={user}
-                      metric={`Withdrawn: ${formatCurrency(user.withdrawal)}`}
-                      subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
-                      onClick={handleUserClick}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                  No critical withdrawals detected
-                </p>
-              )}
-            </MetricCard>
+      {/* Priority Alert Cards - Client Requests */}
+      <div className="mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 1. Disappeared Users */}
+          <MetricCard
+            title="Disappeared Users"
+            count={comparisonResult?.removedUsers?.length || 0}
+            icon={<Users className="h-5 w-5" />}
+            color="red"
+            isExpanded={expandedSections.disappeared}
+            onToggle={() => toggleSection("disappeared")}
+          >
+            {comparisonResult && comparisonResult.removedUsers.length > 0 ? (
+              <div className="space-y-2">
+                {comparisonResult.removedUsers.map((user) => (
+                  <UserRow
+                    key={user.userId}
+                    user={user}
+                    metric={`Equity: ${formatCurrency(user.equity)}`}
+                    onClick={handleUserClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                No users disappeared
+              </p>
+            )}
+          </MetricCard>
+
+          {/* 2. Users Who Lost Money */}
+          <MetricCard
+            title="Significant Losses"
+            count={usersWhoLostMoney.length}
+            icon={<TrendingDown className="h-5 w-5" />}
+            color="orange"
+            isExpanded={expandedSections.lostMoney}
+            onToggle={() => toggleSection("lostMoney")}
+          >
+            {usersWhoLostMoney.length > 0 ? (
+              <div className="space-y-2">
+                {usersWhoLostMoney.map((user) => (
+                  <UserRow
+                    key={user.userId}
+                    user={user}
+                    metric={`Loss: ${formatCurrency(user.loss)}`}
+                    subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
+                    onClick={handleUserClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                No significant losses detected
+              </p>
+            )}
+          </MetricCard>
+
+          {/* 3. Critical Withdrawals */}
+          <MetricCard
+            title="Critical Withdrawals"
+            count={criticalWithdrawals.length}
+            icon={<DollarSign className="h-5 w-5" />}
+            color="purple"
+            isExpanded={expandedSections.withdrawals}
+            onToggle={() => toggleSection("withdrawals")}
+          >
+            {criticalWithdrawals.length > 0 ? (
+              <div className="space-y-2">
+                {criticalWithdrawals.map((user) => (
+                  <UserRow
+                    key={user.userId}
+                    user={user}
+                    metric={`Withdrawn: ${formatCurrency(user.withdrawal)}`}
+                    subMetric={`${formatCurrency(user.oldEquity)} → ${formatCurrency(user.newEquity)}`}
+                    onClick={handleUserClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                No critical withdrawals detected
+              </p>
+            )}
+          </MetricCard>
+        </div>
+      </div>
+
+      {/* Top 3 Users at Risk and Mini Journal - Priority Section */}
+      <div className="mb-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          {/* Top 3 Users at Risk - 2/3 width */}
+          <div className="lg:col-span-2">
+            <TopAtRiskUsers
+              usersWhoLostMoney={usersWhoLostMoney}
+              criticalWithdrawals={criticalWithdrawals}
+              disappearedUsers={comparisonResult?.removedUsers || []}
+              onUserClick={handleUserClick}
+            />
           </div>
-
-          {/* Central Search - Full Width Below Cards */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-            <CentralSearch currentSnapshot={currentSnapshot} onUserClick={handleUserClick} />
+          {/* Mini Journal - 1/3 width */}
+          <div className="lg:col-span-1">
+            <MiniJournal />
           </div>
         </div>
+      </div>
 
-        {/* Right Column: Journal Panel or User Info */}
-        <div className={`${activeTab ? "lg:col-span-5" : "lg:col-span-4"}`}>
-          {activeTab ? (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-              <UserInfoCard
-                user={activeTab.user}
-                account={activeTab.account}
-                onClose={() => {}}
-              />
-            </div>
-          ) : (
-            <JournalPanel />
-          )}
-        </div>
+      {/* Rebates Table */}
+      <div className="mb-3">
+        <RebatesTable rebates={rebatesWithStatus} onRebateClick={handleRebateClick} />
+      </div>
+
+      {/* Rebates KPIs Panel - Secondary Information */}
+      <div className="mb-3">
+        <RebatesKPIs
+          currentSnapshot={currentSnapshot}
+          previousSnapshot={previousSnapshot}
+          snapshots24h={snapshots24h}
+          snapshots7d={snapshots7d}
+        />
+      </div>
+
+      {/* Snapshot Timeline - Calendar View */}
+      <div className="mb-3">
+        <SnapshotTimeline
+          snapshots={snapshots}
+          currentSnapshot={currentSnapshot}
+        />
       </div>
 
       {/* No Data State */}
@@ -351,6 +433,17 @@ export default function Dashboard() {
           </p>
         </div>
       )}
+
+      {/* User Info Modal */}
+      {activeTab && (
+        <UserInfoModal
+          user={activeTab.user}
+          account={activeTab.account}
+          isOpen={!!activeTab}
+          onClose={handleCloseModal}
+        />
+      )}
+
 
     </div>
   );
