@@ -15,25 +15,35 @@ export default function ExcelImportPage() {
 
   const { importFromExcel, isLoading } = useVantageScraper();
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const DEFAULT_SUB_IB_KEY = "vantage_default_subib";
   const [parsedData, setParsedData] = useState<SubIB[] | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [defaultSubIB, setDefaultSubIB] = useState<string>(() => {
+    return localStorage.getItem(DEFAULT_SUB_IB_KEY) || 'Kseinja Gorodnicka';
+  });
 
   const handleFileSelect = useCallback(async (file: File) => {
-    setSelectedFile(file);
     setParseError(null);
     setIsParsing(true);
 
     try {
       const subIBs = await parseExcelToSubIBs(file);
       setParsedData(subIBs);
+      
+      // Auto-select 'Kseinja Gorodnicka' if it exists in the parsed data
+      const kseinjaExists = subIBs.some(sib => sib.ownerName === 'Kseinja Gorodnicka');
+      if (kseinjaExists && !localStorage.getItem(DEFAULT_SUB_IB_KEY)) {
+        setDefaultSubIB('Kseinja Gorodnicka');
+      }
+      
       toast.success(`Successfully parsed ${subIBs.length} Sub-IB(s) with ${subIBs.reduce((sum, sib) => sum + sib.clientCount, 0)} total clients`);
-    } catch (error: any) {
-      setParseError(error.message || 'Failed to parse Excel file');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to parse Excel file';
+      setParseError(errorMessage);
       setParsedData(null);
-      toast.error(error.message || 'Failed to parse Excel file');
+      toast.error(errorMessage);
     } finally {
       setIsParsing(false);
     }
@@ -49,18 +59,17 @@ export default function ExcelImportPage() {
       toast.success('Excel data imported successfully!');
       
       // Reset state
-      setSelectedFile(null);
       setParsedData(null);
       setParseError(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to import Excel data');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to import Excel data';
+      toast.error(errorMessage);
     } finally {
       setIsImporting(false);
     }
   }, [parsedData, importFromExcel]);
 
   const handleClear = useCallback(() => {
-    setSelectedFile(null);
     setParsedData(null);
     setParseError(null);
   }, []);
@@ -87,7 +96,6 @@ export default function ExcelImportPage() {
 
   const totalClients = parsedData?.reduce((sum, sib) => sum + sib.clientCount, 0) || 0;
   const totalBalance = parsedData?.reduce((sum, sib) => sum + sib.totalBalance, 0) || 0;
-  const totalEquity = parsedData?.reduce((sum, sib) => sum + sib.totalEquity, 0) || 0;
 
   return (
     <div className="w-full max-w-7xl mx-auto py-8 px-4 lg:px-6">
@@ -226,6 +234,50 @@ export default function ExcelImportPage() {
                 Showing first 10 of {parsedData.length} Sub-IBs
               </div>
             )}
+          </div>
+
+          {/* Default Sub-IB Selection */}
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Default Sub-IB (will be auto-selected in Dashboard)
+            </label>
+            <select
+              value={defaultSubIB}
+              onChange={(e) => setDefaultSubIB(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">None (no default)</option>
+              {parsedData.map((subIB) => (
+                <option key={subIB.ownerName} value={subIB.ownerName}>
+                  {subIB.ownerName} ({subIB.clientCount} clients)
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              This Sub-IB will be automatically selected when you navigate to the Dashboard
+            </p>
+          </div>
+
+          {/* Default Sub-IB Selection */}
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Default Sub-IB (will be auto-selected in Dashboard)
+            </label>
+            <select
+              value={defaultSubIB}
+              onChange={(e) => setDefaultSubIB(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">None (no default)</option>
+              {parsedData.map((subIB) => (
+                <option key={subIB.ownerName} value={subIB.ownerName}>
+                  {subIB.ownerName} ({subIB.clientCount} clients)
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              This Sub-IB will be automatically selected when you navigate to the Dashboard
+            </p>
           </div>
 
           {/* Action Buttons */}

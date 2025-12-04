@@ -8,7 +8,7 @@ import {
   fetchSnapshotById,
 } from "../services/vantageScraperService";
 import { compareSnapshots } from "../utils/vantageComparison";
-import { saveSnapshot, getLatestSnapshot, getPreviousSnapshot, getSnapshots } from "../utils/vantageStorage";
+import { saveSnapshots, getLatestSnapshot, getPreviousSnapshot, getSnapshots } from "../utils/vantageStorage";
 import type {
   VantageSnapshot,
   ComparisonResult,
@@ -328,14 +328,12 @@ export function useVantageScraper(): UseVantageScraperReturn {
       // This keeps data only in browser localStorage (not backend database)
       
       // Save snapshots to localStorage so they persist across page navigations
-      // Save the new snapshot first (will be the most recent)
-      saveSnapshot(snapshot);
+      // Save both snapshots at once to ensure correct ordering and avoid duplicates
+      const snapshotsToSave = currentBeforeSave 
+        ? [snapshot, currentBeforeSave] // New snapshot first (most recent), then previous
+        : [snapshot]; // Only new snapshot if no previous exists
       
-      // Also save the previous snapshot if it exists (will be the second most recent)
-      // saveSnapshot automatically maintains only the 2 most recent snapshots
-      if (currentBeforeSave) {
-        saveSnapshot(currentBeforeSave);
-      }
+      saveSnapshots(snapshotsToSave);
 
       // Save execution time locally
       localStorage.setItem(STORAGE_LAST_EXECUTION_KEY, Date.now().toString());

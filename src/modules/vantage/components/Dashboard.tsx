@@ -55,6 +55,7 @@ export default function Dashboard() {
   const [snapshotRange, setSnapshotRange] = useState<string | null>(null);
 
   // Sub-IB filter
+  const DEFAULT_SUB_IB_KEY = "vantage_default_subib";
   const [selectedSubIB, setSelectedSubIB] = useState<string | null>(null);
 
   // User tabs from context
@@ -90,6 +91,16 @@ export default function Dashboard() {
       .filter((name): name is string => !!name && name !== "Unknown")
       .sort();
   }, [currentSnapshot]);
+
+  // Auto-select default Sub-IB when snapshot loads
+  useEffect(() => {
+    if (availableSubIBs.length > 0 && !selectedSubIB) {
+      const defaultSubIB = localStorage.getItem(DEFAULT_SUB_IB_KEY);
+      if (defaultSubIB && availableSubIBs.includes(defaultSubIB)) {
+        setSelectedSubIB(defaultSubIB);
+      }
+    }
+  }, [availableSubIBs, selectedSubIB]);
 
   // Calculate users who lost significant money (>$500 loss)
   const usersWhoLostMoney = useMemo(() => {
