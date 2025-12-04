@@ -1,0 +1,1 @@
+Date	User ID	Account	Name	Account owner	Campaign source	Account Type	Platform	Base Currency	Balance	Account Equity	Credit	Account Journey	Last Trade Time	Last Traded Instrument	Last Traded Lots	Last Deposit Time	Last Deposit Amount

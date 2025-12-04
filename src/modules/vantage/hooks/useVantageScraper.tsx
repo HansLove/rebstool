@@ -26,6 +26,7 @@ interface UseVantageScraperReturn {
 
   // Actions
   runScraper: (credentials?: VantageCredentials) => Promise<void>;
+  importFromExcel: (snapshot: VantageSnapshot) => Promise<void>;
   clearSnapshots: () => void;
   selectSnapshotForComparison: (snapshotId: string) => Promise<void>;
   resetToLatest: () => void;
@@ -256,6 +257,65 @@ export function useVantageScraper(): UseVantageScraperReturn {
     }
   }, [snapshotsData]);
 
+  // Import snapshot from Excel data
+  const importFromExcel = useCallback(async (snapshot: VantageSnapshot) => {
+    try {
+      setError(null);
+      
+      // Get the current snapshot before updating (becomes previous)
+      const currentBeforeSave = currentSnapshot;
+
+      // Update state: new snapshot becomes current, old current becomes previous
+      setCurrentSnapshot(snapshot);
+      setPreviousSnapshot(currentBeforeSave || null);
+
+      // Compare with previous snapshot (the one that was current before saving)
+      if (currentBeforeSave) {
+        const comparison = compareSnapshots(currentBeforeSave, snapshot);
+        setComparisonResult(comparison);
+
+        // Show notifications for changes
+        if (comparison.summary.totalNew > 0) {
+          toast.success(
+            `${comparison.summary.totalNew} new user(s) detected`,
+            { duration: 5000 }
+          );
+        }
+        if (comparison.summary.totalRemoved > 0) {
+          toast.error(
+            `${comparison.summary.totalRemoved} user(s) removed`,
+            { duration: 6000 }
+          );
+        }
+        if (comparison.summary.totalChanged > 0) {
+          toast(
+            `${comparison.summary.totalChanged} user(s) with changes`,
+            { duration: 4000 }
+          );
+        }
+      } else {
+        // First snapshot, no comparison
+        setComparisonResult(null);
+        toast.success("Excel data imported successfully. Import again to start comparing.", {
+          duration: 4000,
+        });
+      }
+
+      // NOTE: We do NOT invalidate queries or call the API
+      // This keeps data only in browser memory (localStorage for timestamp only)
+      // No data is persisted to the backend database
+
+      // Save execution time locally
+      localStorage.setItem(STORAGE_LAST_EXECUTION_KEY, Date.now().toString());
+    } catch (err: any) {
+      setError(err);
+      toast.error(err.message || "Failed to import Excel data", {
+        duration: 6000,
+      });
+      throw err;
+    }
+  }, [currentSnapshot]);
+
   // Get snapshots list from API data
   const snapshots = useMemo(() => {
     return snapshotsData?.snapshots || [];
@@ -288,6 +348,7 @@ export function useVantageScraper(): UseVantageScraperReturn {
     isFetching,
     error: displayError,
     runScraper,
+    importFromExcel,
     clearSnapshots,
     selectSnapshotForComparison,
     resetToLatest,
