@@ -8,6 +8,7 @@ import {
   fetchSnapshotById,
 } from "../services/vantageScraperService";
 import { compareSnapshots } from "../utils/vantageComparison";
+import { saveSnapshot, getLatestSnapshot, getPreviousSnapshot, getSnapshots } from "../utils/vantageStorage";
 import type {
   VantageSnapshot,
   ComparisonResult,
@@ -58,9 +59,31 @@ export function useVantageScraper(): UseVantageScraperReturn {
     refetchOnWindowFocus: false,
   });
 
-  // Load latest and previous snapshots from API data
-  // For comparison, we need full snapshots with clients, so fetch them separately
+  // Load snapshots from localStorage first (for Excel imports)
+  // Then load from API if available
   useEffect(() => {
+    // First, try to load from localStorage (Excel imports)
+    const localLatest = getLatestSnapshot();
+    const localPrevious = getPreviousSnapshot();
+
+    if (localLatest) {
+      // We have local snapshots (from Excel import)
+      setCurrentSnapshot(localLatest);
+      
+      if (localPrevious) {
+        setPreviousSnapshot(localPrevious);
+        const comparison = compareSnapshots(localPrevious, localLatest);
+        setComparisonResult(comparison);
+      } else {
+        setPreviousSnapshot(null);
+        setComparisonResult(null);
+      }
+      
+      // Don't override with API data if we have local Excel data
+      return;
+    }
+
+    // If no local snapshots, load from API
     if (snapshotsData?.snapshots && snapshotsData.snapshots.length > 0) {
       const latestSummary = snapshotsData.snapshots[0]; // First item is latest (sorted by timestamp desc)
       const previousSummary = snapshotsData.snapshots[1] || null; // Second item is previous
@@ -302,8 +325,17 @@ export function useVantageScraper(): UseVantageScraperReturn {
       }
 
       // NOTE: We do NOT invalidate queries or call the API
-      // This keeps data only in browser memory (localStorage for timestamp only)
-      // No data is persisted to the backend database
+      // This keeps data only in browser localStorage (not backend database)
+      
+      // Save snapshots to localStorage so they persist across page navigations
+      // Save the new snapshot first (will be the most recent)
+      saveSnapshot(snapshot);
+      
+      // Also save the previous snapshot if it exists (will be the second most recent)
+      // saveSnapshot automatically maintains only the 2 most recent snapshots
+      if (currentBeforeSave) {
+        saveSnapshot(currentBeforeSave);
+      }
 
       // Save execution time locally
       localStorage.setItem(STORAGE_LAST_EXECUTION_KEY, Date.now().toString());
@@ -316,9 +348,19 @@ export function useVantageScraper(): UseVantageScraperReturn {
     }
   }, [currentSnapshot]);
 
-  // Get snapshots list from API data
+  // Get snapshots list - combine API data with local Excel imports
   const snapshots = useMemo(() => {
-    return snapshotsData?.snapshots || [];
+    const apiSnapshots = snapshotsData?.snapshots || [];
+    const localSnapshots = getSnapshots();
+    
+    // Combine both sources, prioritizing local snapshots (Excel imports)
+    // Remove duplicates by ID and sort by timestamp descending
+    const allSnapshots = [...localSnapshots, ...apiSnapshots];
+    const uniqueSnapshots = Array.from(
+      new Map(allSnapshots.map(s => [s.id, s])).values()
+    );
+    
+    return uniqueSnapshots.sort((a, b) => b.timestamp - a.timestamp);
   }, [snapshotsData]);
 
   // Get last execution time
