@@ -12,16 +12,23 @@ export default function CentralSearch({ currentSnapshot, onUserClick }: CentralS
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<RetailClient | null>(null);
 
-  // Extract all retail clients from snapshot
+  // Extract all retail clients from snapshot and deduplicate by userId
   const allClients = useMemo(() => {
     if (!currentSnapshot) return [];
-    const clients: RetailClient[] = [];
+    const clientsMap = new Map<number, RetailClient>();
+    
     currentSnapshot.retailResults.forEach((result) => {
       if (result.retail?.data && Array.isArray(result.retail.data)) {
-        clients.push(...result.retail.data);
+        result.retail.data.forEach((client) => {
+          // Only add if we haven't seen this userId before (deduplicate)
+          if (!clientsMap.has(client.userId)) {
+            clientsMap.set(client.userId, client);
+          }
+        });
       }
     });
-    return clients;
+    
+    return Array.from(clientsMap.values());
   }, [currentSnapshot]);
 
   // Simple search - matches name, userId, or phone
@@ -29,11 +36,14 @@ export default function CentralSearch({ currentSnapshot, onUserClick }: CentralS
     if (!searchTerm.trim() || !allClients.length) return [];
     
     const term = searchTerm.toLowerCase().trim();
+    const normalizedTerm = term.replace(/\D/g, "");
+    
     return allClients
       .filter((client) => {
-        const nameMatch = client.name?.toLowerCase().includes(term);
+        const nameMatch = client.name?.toLowerCase().includes(term) ?? false;
         const userIdMatch = client.userId.toString().includes(term);
-        const phoneMatch = client.phone?.replace(/\D/g, "").includes(term.replace(/\D/g, ""));
+        const phoneNormalized = client.phone?.replace(/\D/g, "") ?? "";
+        const phoneMatch = normalizedTerm.length > 0 && phoneNormalized.includes(normalizedTerm);
         return nameMatch || userIdMatch || phoneMatch;
       })
       .slice(0, 10); // Limit to 10 results
