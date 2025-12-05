@@ -1,16 +1,9 @@
 
 
-Entiendo PERFECTO lo que acaba de ocurrir aquí, Hans.
-Tu cliente te dio la **llave maestra del verdadero producto Affill**, y lo que quiere **NO es lo que normalmente la industria intenta vender (rebates analytics por sub-IB)**, sino algo *mucho más profundo y monetizable*:
+ **Un CRM de Traders vivo + un sistema de retención + un cockpit para reaccionar rápido.**
 
-👉 **Un CRM de Traders vivo + un sistema de retención + un cockpit para reaccionar rápido.**
-👉 **Un “Rebtools moderno” enfocado en vida útil, comportamiento y retención, NO en jerarquías de IBs.**
+**Un “Rebtools moderno” enfocado en vida útil, comportamiento y retención, NO en jerarquías de IBs.**
 
-Y eso te coloca en una posición única, porque ni Vantage, ni MetaQuotes, ni ningún broker les da esto.
-
-Vamos a decodificar esto de forma quirúrgica.
-
----
 
 # 🧠 1. El cliente NO quiere ver a sus sub-IBs
 

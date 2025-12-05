@@ -1,131 +1,282 @@
+/**
+ * Vantage Snapshot Storage
+ * Uses IndexedDB for large snapshots with fallback to localStorage
+ * Maintains compatibility with existing code
+ */
+
 import type { VantageSnapshot } from "../types";
+import {
+  initDB,
+  saveSnapshot as saveSnapshotIDB,
+  saveSnapshots as saveSnapshotsIDB,
+  getSnapshots as getSnapshotsIDB,
+  getLatestSnapshot as getLatestSnapshotIDB,
+  getPreviousSnapshot as getPreviousSnapshotIDB,
+  getSnapshotById as getSnapshotByIdIDB,
+  clearSnapshots as clearSnapshotsIDB,
+  getSnapshotsInRange as getSnapshotsInRangeIDB,
+  isIndexedDBAvailable,
+} from "./vantageIndexedDB";
 
 const STORAGE_KEY = "vantage_snapshots";
-const MAX_SNAPSHOTS = 2; // Always keep only 2 snapshots: previous and current
+const MAX_SNAPSHOTS = 2;
+const MIGRATION_FLAG_KEY = "vantage_migrated_to_indexeddb";
+
+// Initialize IndexedDB on module load
+let indexedDBReady = false;
+let migrationAttempted = false;
 
 /**
- * Saves a snapshot to localStorage, maintaining only the 2 most recent snapshots
- * This ensures we always have the previous and current snapshot for comparison
+ * Initialize IndexedDB and migrate data if needed
  */
-export function saveSnapshot(snapshot: VantageSnapshot): void {
+async function ensureIndexedDBReady(): Promise<boolean> {
+  if (indexedDBReady) return true;
+  if (!isIndexedDBAvailable()) return false;
+
   try {
-    const snapshots = getSnapshots();
+    await initDB();
     
-    // Remove duplicate by ID if it already exists
+    // Migrate from localStorage if not already migrated
+    if (!migrationAttempted) {
+      migrationAttempted = true;
+      const alreadyMigrated = localStorage.getItem(MIGRATION_FLAG_KEY);
+      
+      if (!alreadyMigrated) {
+        await migrateFromLocalStorage();
+        localStorage.setItem(MIGRATION_FLAG_KEY, "true");
+      }
+    }
+    
+    indexedDBReady = true;
+    return true;
+  } catch (error) {
+    console.warn("IndexedDB initialization failed, falling back to localStorage:", error);
+    return false;
+  }
+}
+
+/**
+ * Migrate snapshots from localStorage to IndexedDB
+ */
+async function migrateFromLocalStorage(): Promise<void> {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+
+    const snapshots: VantageSnapshot[] = JSON.parse(stored);
+    if (snapshots.length === 0) return;
+
+    // Restore Maps from serialized data
+    const restoredSnapshots = snapshots.map(snapshot => ({
+      ...snapshot,
+      metadata: {
+        ...snapshot.metadata,
+        accountsByUserId: new Map(snapshot.metadata.accountsByUserId || []),
+        clientsByOwner: new Map(snapshot.metadata.clientsByOwner || []),
+      },
+    }));
+
+    // Save to IndexedDB
+    await saveSnapshotsIDB(restoredSnapshots);
+    
+    console.log(`Migrated ${restoredSnapshots.length} snapshot(s) from localStorage to IndexedDB`);
+  } catch (error) {
+    console.error("Failed to migrate from localStorage:", error);
+    // Don't throw - allow fallback to localStorage
+  }
+}
+
+/**
+ * Fallback: Save to localStorage (for when IndexedDB is not available)
+ */
+function saveSnapshotLocalStorage(snapshot: VantageSnapshot): void {
+  try {
+    const snapshots = getSnapshotsLocalStorage();
     const filtered = snapshots.filter(s => s.id !== snapshot.id);
-    
-    // Add new snapshot
     filtered.push(snapshot);
-
-    // Sort by timestamp descending (newest first)
     const sorted = filtered.sort((a, b) => b.timestamp - a.timestamp);
-    
-    // Keep only the 2 most recent snapshots
-    // [0] = current (newest)
-    // [1] = previous (second newest)
     const trimmed = sorted.slice(0, MAX_SNAPSHOTS);
-
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch (error) {
-    console.error("Failed to save Vantage snapshot:", error);
+    console.error("Failed to save snapshot to localStorage:", error);
     throw new Error("Failed to save snapshot to storage");
   }
 }
 
 /**
- * Saves multiple snapshots at once, maintaining only the 2 most recent
- * Useful when importing a new Excel to ensure both current and previous are saved correctly
+ * Fallback: Get snapshots from localStorage
  */
-export function saveSnapshots(snapshotsToSave: VantageSnapshot[]): void {
+function getSnapshotsLocalStorage(): VantageSnapshot[] {
   try {
-    const existingSnapshots = getSnapshots();
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
     
-    // Create a map to avoid duplicates by ID
+    const snapshots = JSON.parse(stored);
+    // Restore Maps
+    return snapshots.map((snapshot: any) => ({
+      ...snapshot,
+      metadata: {
+        ...snapshot.metadata,
+        accountsByUserId: new Map(snapshot.metadata.accountsByUserId || []),
+        clientsByOwner: new Map(snapshot.metadata.clientsByOwner || []),
+      },
+    }));
+  } catch (error) {
+    console.error("Failed to retrieve snapshots from localStorage:", error);
+    return [];
+  }
+}
+
+/**
+ * Saves a snapshot to storage (IndexedDB preferred, localStorage fallback)
+ * Now async to support IndexedDB
+ */
+export async function saveSnapshot(snapshot: VantageSnapshot): Promise<void> {
+  const useIndexedDB = await ensureIndexedDBReady();
+  
+  if (useIndexedDB) {
+    try {
+      await saveSnapshotIDB(snapshot);
+      return;
+    } catch (error) {
+      console.warn("IndexedDB save failed, falling back to localStorage:", error);
+    }
+  }
+  
+  // Fallback to localStorage
+  saveSnapshotLocalStorage(snapshot);
+}
+
+/**
+ * Saves multiple snapshots at once
+ * Now async to support IndexedDB
+ */
+export async function saveSnapshots(snapshotsToSave: VantageSnapshot[]): Promise<void> {
+  const useIndexedDB = await ensureIndexedDBReady();
+  
+  if (useIndexedDB) {
+    try {
+      await saveSnapshotsIDB(snapshotsToSave);
+      return;
+    } catch (error) {
+      console.warn("IndexedDB save failed, falling back to localStorage:", error);
+    }
+  }
+  
+  // Fallback to localStorage
+  try {
+    const existingSnapshots = getSnapshotsLocalStorage();
     const snapshotMap = new Map<string, VantageSnapshot>();
-    
-    // Add existing snapshots
     existingSnapshots.forEach(s => snapshotMap.set(s.id, s));
-    
-    // Add/update with new snapshots (will overwrite if same ID)
     snapshotsToSave.forEach(s => snapshotMap.set(s.id, s));
-    
-    // Convert to array and sort by timestamp descending
     const allSnapshots = Array.from(snapshotMap.values());
     const sorted = allSnapshots.sort((a, b) => b.timestamp - a.timestamp);
-    
-    // Keep only the 2 most recent snapshots
     const trimmed = sorted.slice(0, MAX_SNAPSHOTS);
-    
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch (error) {
-    console.error("Failed to save Vantage snapshots:", error);
+    console.error("Failed to save snapshots to localStorage:", error);
     throw new Error("Failed to save snapshots to storage");
   }
 }
 
 /**
  * Retrieves all stored snapshots
+ * Now async to support IndexedDB
  */
-export function getSnapshots(): VantageSnapshot[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error("Failed to retrieve Vantage snapshots:", error);
-    return [];
+export async function getSnapshots(): Promise<VantageSnapshot[]> {
+  const useIndexedDB = await ensureIndexedDBReady();
+  
+  if (useIndexedDB) {
+    try {
+      return await getSnapshotsIDB();
+    } catch (error) {
+      console.warn("IndexedDB get failed, falling back to localStorage:", error);
+    }
   }
+  
+  // Fallback to localStorage
+  return getSnapshotsLocalStorage();
 }
 
 /**
  * Gets the most recent snapshot (current)
+ * Now async to support IndexedDB
  */
-export function getLatestSnapshot(): VantageSnapshot | null {
-  const snapshots = getSnapshots();
-  if (snapshots.length === 0) return null;
-  
-  // Sort by timestamp descending and return the newest
-  const sorted = snapshots.sort((a, b) => b.timestamp - a.timestamp);
-  return sorted[0];
+export async function getLatestSnapshot(): Promise<VantageSnapshot | null> {
+  const snapshots = await getSnapshots();
+  return snapshots.length > 0 ? snapshots[0] : null;
 }
 
 /**
  * Gets the previous snapshot (second most recent)
- * This is the snapshot that will be compared with the new one
+ * Now async to support IndexedDB
  */
-export function getPreviousSnapshot(): VantageSnapshot | null {
-  const snapshots = getSnapshots();
-  if (snapshots.length < 2) return null;
-  
-  // Sort by timestamp descending and return the second newest
-  const sorted = snapshots.sort((a, b) => b.timestamp - a.timestamp);
-  return sorted[1];
+export async function getPreviousSnapshot(): Promise<VantageSnapshot | null> {
+  const snapshots = await getSnapshots();
+  return snapshots.length >= 2 ? snapshots[1] : null;
 }
 
 /**
  * Gets a specific snapshot by ID
+ * Now async to support IndexedDB
  */
-export function getSnapshotById(id: string): VantageSnapshot | null {
-  const snapshots = getSnapshots();
+export async function getSnapshotById(id: string): Promise<VantageSnapshot | null> {
+  const useIndexedDB = await ensureIndexedDBReady();
+  
+  if (useIndexedDB) {
+    try {
+      return await getSnapshotByIdIDB(id);
+    } catch (error) {
+      console.warn("IndexedDB getById failed, falling back to localStorage:", error);
+    }
+  }
+  
+  // Fallback to localStorage
+  const snapshots = getSnapshotsLocalStorage();
   return snapshots.find((s) => s.id === id) || null;
 }
 
 /**
  * Clears all stored snapshots
+ * Now async to support IndexedDB
  */
-export function clearSnapshots(): void {
+export async function clearSnapshots(): Promise<void> {
+  const useIndexedDB = await ensureIndexedDBReady();
+  
+  if (useIndexedDB) {
+    try {
+      await clearSnapshotsIDB();
+      return;
+    } catch (error) {
+      console.warn("IndexedDB clear failed, falling back to localStorage:", error);
+    }
+  }
+  
+  // Fallback to localStorage
   localStorage.removeItem(STORAGE_KEY);
 }
 
 /**
  * Gets snapshots within a date range
+ * Now async to support IndexedDB
  */
-export function getSnapshotsInRange(
+export async function getSnapshotsInRange(
   startTimestamp: number,
   endTimestamp: number
-): VantageSnapshot[] {
-  const snapshots = getSnapshots();
+): Promise<VantageSnapshot[]> {
+  const useIndexedDB = await ensureIndexedDBReady();
+  
+  if (useIndexedDB) {
+    try {
+      return await getSnapshotsInRangeIDB(startTimestamp, endTimestamp);
+    } catch (error) {
+      console.warn("IndexedDB range query failed, falling back to localStorage:", error);
+    }
+  }
+  
+  // Fallback to localStorage
+  const snapshots = getSnapshotsLocalStorage();
   return snapshots.filter(
     (s) => s.timestamp >= startTimestamp && s.timestamp <= endTimestamp
   );
 }
-

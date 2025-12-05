@@ -59,69 +59,79 @@ export function useVantageScraper(): UseVantageScraperReturn {
     refetchOnWindowFocus: false,
   });
 
-  // Load snapshots from localStorage first (for Excel imports)
+  // Load snapshots from IndexedDB/localStorage first (for Excel imports)
   // Then load from API if available
   useEffect(() => {
-    // First, try to load from localStorage (Excel imports)
-    const localLatest = getLatestSnapshot();
-    const localPrevious = getPreviousSnapshot();
+    // First, try to load from IndexedDB/localStorage (Excel imports)
+    const loadLocalSnapshots = async () => {
+      try {
+        const localLatest = await getLatestSnapshot();
+        const localPrevious = await getPreviousSnapshot();
 
-    if (localLatest) {
-      // We have local snapshots (from Excel import)
-      setCurrentSnapshot(localLatest);
-      
-      if (localPrevious) {
-        setPreviousSnapshot(localPrevious);
-        const comparison = compareSnapshots(localPrevious, localLatest);
-        setComparisonResult(comparison);
-      } else {
-        setPreviousSnapshot(null);
-        setComparisonResult(null);
-      }
-      
-      // Don't override with API data if we have local Excel data
-      return;
-    }
-
-    // If no local snapshots, load from API
-    if (snapshotsData?.snapshots && snapshotsData.snapshots.length > 0) {
-      const latestSummary = snapshotsData.snapshots[0]; // First item is latest (sorted by timestamp desc)
-      const previousSummary = snapshotsData.snapshots[1] || null; // Second item is previous
-
-      // Fetch full snapshots with clients for comparison
-      const loadFullSnapshots = async () => {
-        try {
-          // Fetch latest snapshot with clients (needed for comparison and display)
-          const latestFull = await fetchSnapshotById(latestSummary.id, true, 10000); // Include clients, high limit
-          setCurrentSnapshot(latestFull);
-
-          if (previousSummary) {
-            // Fetch previous snapshot with clients for comparison
-            const previousFull = await fetchSnapshotById(previousSummary.id, true, 10000);
-            setPreviousSnapshot(previousFull);
-            const comparison = compareSnapshots(previousFull, latestFull);
+        if (localLatest) {
+          // We have local snapshots (from Excel import)
+          setCurrentSnapshot(localLatest);
+          
+          if (localPrevious) {
+            setPreviousSnapshot(localPrevious);
+            const comparison = compareSnapshots(localPrevious, localLatest);
             setComparisonResult(comparison);
           } else {
             setPreviousSnapshot(null);
             setComparisonResult(null);
           }
-        } catch (err) {
-          console.error("Error loading full snapshots:", err);
-          // Fallback to summary snapshots if full fetch fails
-          setCurrentSnapshot(latestSummary);
-          if (previousSummary) {
-            setPreviousSnapshot(previousSummary);
-            // Can't compare without full client data, so set comparison to null
-            setComparisonResult(null);
-          }
+          
+          // Don't override with API data if we have local Excel data
+          return;
         }
-      };
+      } catch (error) {
+        console.error("Error loading local snapshots:", error);
+        // Continue to API loading if local fails
+      }
 
-      loadFullSnapshots();
-    } else if (snapshotsError) {
-      setError(snapshotsError as Error);
-    }
+      // If no local snapshots, load from API
+      if (snapshotsData?.snapshots && snapshotsData.snapshots.length > 0) {
+        const latestSummary = snapshotsData.snapshots[0]; // First item is latest (sorted by timestamp desc)
+        const previousSummary = snapshotsData.snapshots[1] || null; // Second item is previous
+
+        // Fetch full snapshots with clients for comparison
+        const loadFullSnapshots = async () => {
+          try {
+            // Fetch latest snapshot with clients (needed for comparison and display)
+            const latestFull = await fetchSnapshotById(latestSummary.id, true, 10000); // Include clients, high limit
+            setCurrentSnapshot(latestFull);
+
+            if (previousSummary) {
+              // Fetch previous snapshot with clients for comparison
+              const previousFull = await fetchSnapshotById(previousSummary.id, true, 10000);
+              setPreviousSnapshot(previousFull);
+              const comparison = compareSnapshots(previousFull, latestFull);
+              setComparisonResult(comparison);
+            } else {
+              setPreviousSnapshot(null);
+              setComparisonResult(null);
+            }
+          } catch (err) {
+            console.error("Error loading full snapshots:", err);
+            // Fallback to summary snapshots if full fetch fails
+            setCurrentSnapshot(latestSummary);
+            if (previousSummary) {
+              setPreviousSnapshot(previousSummary);
+              // Can't compare without full client data, so set comparison to null
+              setComparisonResult(null);
+            }
+          }
+        };
+
+        loadFullSnapshots();
+      } else if (snapshotsError) {
+        setError(snapshotsError as Error);
+      }
+    };
+
+    loadLocalSnapshots();
   }, [snapshotsData, snapshotsError]);
+
 
   // Mutation for running the scraper
   const mutation = useMutation({
@@ -327,13 +337,13 @@ export function useVantageScraper(): UseVantageScraperReturn {
       // NOTE: We do NOT invalidate queries or call the API
       // This keeps data only in browser localStorage (not backend database)
       
-      // Save snapshots to localStorage so they persist across page navigations
+      // Save snapshots to IndexedDB/localStorage so they persist across page navigations
       // Save both snapshots at once to ensure correct ordering and avoid duplicates
       const snapshotsToSave = currentBeforeSave 
         ? [snapshot, currentBeforeSave] // New snapshot first (most recent), then previous
         : [snapshot]; // Only new snapshot if no previous exists
       
-      saveSnapshots(snapshotsToSave);
+      await saveSnapshots(snapshotsToSave);
 
       // Save execution time locally
       localStorage.setItem(STORAGE_LAST_EXECUTION_KEY, Date.now().toString());
@@ -347,9 +357,23 @@ export function useVantageScraper(): UseVantageScraperReturn {
   }, [currentSnapshot]);
 
   // Get snapshots list - combine API data with local Excel imports
+  const [localSnapshots, setLocalSnapshots] = useState<VantageSnapshot[]>([]);
+  
+  useEffect(() => {
+    const loadLocalSnapshots = async () => {
+      try {
+        const snapshots = await getSnapshots();
+        setLocalSnapshots(snapshots);
+      } catch (error) {
+        console.error("Error loading local snapshots:", error);
+        setLocalSnapshots([]);
+      }
+    };
+    loadLocalSnapshots();
+  }, [currentSnapshot]); // Reload when current snapshot changes
+  
   const snapshots = useMemo(() => {
     const apiSnapshots = snapshotsData?.snapshots || [];
-    const localSnapshots = getSnapshots();
     
     // Combine both sources, prioritizing local snapshots (Excel imports)
     // Remove duplicates by ID and sort by timestamp descending
@@ -359,7 +383,7 @@ export function useVantageScraper(): UseVantageScraperReturn {
     );
     
     return uniqueSnapshots.sort((a, b) => b.timestamp - a.timestamp);
-  }, [snapshotsData]);
+  }, [snapshotsData, localSnapshots]);
 
   // Get last execution time
   const lastExecutionTime = localStorage.getItem(STORAGE_LAST_EXECUTION_KEY)
