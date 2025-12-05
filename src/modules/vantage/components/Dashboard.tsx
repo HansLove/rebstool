@@ -506,9 +506,9 @@ export default function Dashboard() {
       </div>
 
       {/* Rebates Table */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <RebatesTable rebates={rebatesWithStatus} onRebateClick={handleRebateClick} />
-      </div>
+      </div> */}
 
       {/* Rebates KPIs Panel - Secondary Information */}
       <div className="mb-3">
